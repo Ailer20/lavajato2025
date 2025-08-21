@@ -1,0 +1,399 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block title %}Relatórios - Lava Jato 2025{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div class="search-container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2 class="mb-3">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    RELATÓRIOS E ESTATÍSTICAS
+                </h2>
+                
+                <!-- Filtros de período -->
+                <form method="GET" class="row g-3" id="filtroRelatorio">
+                    <div class="col-md-3">
+                        <label class="form-label-custom">Data Início</label>
+                        <input type="date" 
+                               class="form-control form-control-custom" 
+                               name="data_inicio" 
+                               id="data_inicio"
+                               value="{{ data_inicio }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom">Data Fim</label>
+                        <input type="date" 
+                               class="form-control form-control-custom" 
+                               name="data_fim" 
+                               id="data_fim"
+                               value="{{ data_fim }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom">Base</label>
+                        <select class="form-control form-control-custom" name="base_filtro">
+                            <option value="">Todas as Bases</option>
+                            {% for base in bases %}
+                                <option value="{{ base.id }}" {% if base_filtro == base.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ base.nome }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom">&nbsp;</label>
+                        <button type="submit" class="btn btn-primary-custom w-100">
+                            <i class="fas fa-search me-1"></i>
+                            Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-success-custom" onclick="exportarRelatorio()">
+                    <i class="fas fa-download me-2"></i>
+                    Exportar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <i class="fas fa-car-wash fa-2x text-primary mb-2"></i>
+                    <h3 class="text-primary">{{ estatisticas.total_lavagens }}</h3>
+                    <p class="mb-0">Total de Lavagens</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                    <h3 class="text-warning">{{ estatisticas.lavagens_em_andamento }}</h3>
+                    <p class="mb-0">Em Andamento</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h3 class="text-success">{{ estatisticas.lavagens_concluidas }}</h3>
+                    <p class="mb-0">Concluídas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <i class="fas fa-dollar-sign fa-2x text-info mb-2"></i>
+                    <h3 class="text-info">R$ {{ estatisticas.faturamento_mes }}</h3>
+                    <p class="mb-0">Faturamento do Mês</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row mb-4">
+        <!-- Gráfico de Lavagens por Status -->
+        <div class="col-md-6">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-pie-chart me-2"></i>
+                        Lavagens por Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="graficoStatus" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Lavagens por Base -->
+        <div class="col-md-6">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bar-chart me-2"></i>
+                        Lavagens por Base
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="graficoBase" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico de Faturamento por Período -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-line-chart me-2"></i>
+                        Faturamento por Período
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="graficoFaturamento" width="800" height="400"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Resumo -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h5 class="mb-0">
+                <i class="fas fa-table me-2"></i>
+                Resumo Detalhado
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-primary mb-3">Estatísticas Gerais</h6>
+                    <table class="table table-custom">
+                        <tbody>
+                            <tr>
+                                <td>Total de Lavagens</td>
+                                <td><strong>{{ estatisticas.total_lavagens }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Lavagens Concluídas</td>
+                                <td><strong class="text-success">{{ estatisticas.lavagens_concluidas }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Lavagens Canceladas</td>
+                                <td><strong class="text-danger">{{ estatisticas.lavagens_canceladas }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Tempo Médio de Lavagem</td>
+                                <td><strong>{{ estatisticas.tempo_medio_lavagem }} min</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-primary mb-3">Faturamento</h6>
+                    <table class="table table-custom">
+                        <tbody>
+                            <tr>
+                                <td>Faturamento do Dia</td>
+                                <td><strong class="text-success">R$ {{ estatisticas.faturamento_dia }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Faturamento do Mês</td>
+                                <td><strong class="text-success">R$ {{ estatisticas.faturamento_mes }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Ticket Médio</td>
+                                <td><strong>R$ {{ ticket_medio|floatformat:2 }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Meta do Mês</td>
+                                <td><strong class="text-info">R$ 50.000,00</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Configuração global dos gráficos
+Chart.defaults.color = '#ffffff';
+Chart.defaults.borderColor = '#404040';
+
+// Gráfico de Status (Pizza)
+const ctxStatus = document.getElementById('graficoStatus').getContext('2d');
+new Chart(ctxStatus, {
+    type: 'doughnut',
+    data: {
+        labels: ['Em Andamento', 'Concluídas', 'Canceladas'],
+        datasets: [{
+            data: [
+                {{ estatisticas.lavagens_em_andamento }},
+                {{ estatisticas.lavagens_concluidas }},
+                {{ estatisticas.lavagens_canceladas }}
+            ],
+            backgroundColor: [
+                '#ffc107',
+                '#28a745',
+                '#dc3545'
+            ],
+            borderWidth: 2,
+            borderColor: '#2d2d2d'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: '#ffffff',
+                    padding: 20
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Bases (Barras)
+const ctxBase = document.getElementById('graficoBase').getContext('2d');
+new Chart(ctxBase, {
+    type: 'bar',
+    data: {
+        labels: [
+            {% for base, total in estatisticas.lavagens_por_base.items %}
+                '{{ base }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Lavagens',
+            data: [
+                {% for base, total in estatisticas.lavagens_por_base.items %}
+                    {{ total }},
+                {% endfor %}
+            ],
+            backgroundColor: '#3b4cb8',
+            borderColor: '#2d3a8c',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: '#ffffff'
+                },
+                grid: {
+                    color: '#404040'
+                }
+            },
+            x: {
+                ticks: {
+                    color: '#ffffff'
+                },
+                grid: {
+                    color: '#404040'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#ffffff'
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Faturamento (Linha)
+const ctxFaturamento = document.getElementById('graficoFaturamento').getContext('2d');
+new Chart(ctxFaturamento, {
+    type: 'line',
+    data: {
+        labels: {{ faturamento_labels|safe }},
+        datasets: [{
+            label: 'Faturamento (R$)',
+            data: {{ faturamento_dados|safe }},
+            borderColor: '#28a745',
+            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: '#ffffff',
+                    callback: function(value) {
+                        return 'R$ ' + value.toLocaleString('pt-BR');
+                    }
+                },
+                grid: {
+                    color: '#404040'
+                }
+            },
+            x: {
+                ticks: {
+                    color: '#ffffff'
+                },
+                grid: {
+                    color: '#404040'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#ffffff'
+                }
+            }
+        }
+    }
+});
+
+// Função para exportar relatório
+function exportarRelatorio() {
+    const dataInicio = document.getElementById('data_inicio').value;
+    const dataFim = document.getElementById('data_fim').value;
+    
+    if (!dataInicio || !dataFim) {
+        alert('Por favor, selecione o período para exportação.');
+        return;
+    }
+    
+    // Aqui você pode implementar a exportação para PDF
+    window.open(`/api/lavagens/relatorio_periodo/?data_inicio=${dataInicio}&data_fim=${dataFim}&format=pdf`);
+}
+
+// Definir datas padrão (último mês)
+document.addEventListener('DOMContentLoaded', function() {
+    const hoje = new Date();
+    const umMesAtras = new Date(hoje.getFullYear(), hoje.getMonth() - 1, hoje.getDate());
+    
+    if (!document.getElementById('data_inicio').value) {
+        document.getElementById('data_inicio').value = umMesAtras.toISOString().split('T')[0];
+    }
+    if (!document.getElementById('data_fim').value) {
+        document.getElementById('data_fim').value = hoje.toISOString().split('T')[0];
+    }
+});
+</script>
+{% endblock %}
+

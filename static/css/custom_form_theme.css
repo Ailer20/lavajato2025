@@ -1,0 +1,134 @@
+/* ==========================================================================
+   TEMA ESCURO PERSONALIZADO PARA FORMULÁRIOS
+   ========================================================================== */
+
+/* --- Container Principal do Formulário --- */
+.form-container {
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    border-radius: 1rem; /* Bordas bem arredondadas */
+    padding: 2rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid #4b5563; /* Borda sutil para definição */
+}
+
+/* --- Título dentro do formulário --- */
+.form-container h3 {
+    color: #f3f4f6;
+    font-weight: 600;
+    border-bottom: 1px solid #4b5563;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem !important; /* Sobrescreve margem do Bootstrap */
+}
+
+/* --- Rótulos (Labels) dos Campos --- */
+.form-label-custom {
+    color: #d1d5db; /* Cinza um pouco mais suave que o branco */
+    font-weight: 600;
+    font-size: 0.875rem; /* 14px */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* --- Campos de Entrada (Inputs, Textareas) --- */
+.form-control-custom {
+    background-color: #374151;
+    border: 1px solid #4b5563;
+    color: #f3f4f6;
+    border-radius: 0.5rem; /* 8px */
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control-custom::placeholder {
+    color: #6b7280; /* Cor para o texto de placeholder */
+}
+
+.form-control-custom:focus {
+    background-color: #4b5563;
+    border-color: #3b82f6; /* Azul para indicar foco */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    color: #ffffff;
+    outline: none; /* Remove o outline padrão do navegador */
+}
+textarea.form-control-custom {
+    width: 100% !important; /* Força o textarea a ocupar 100% da coluna */
+    max-width: 100%;      /* Impede que ele fique maior que a coluna */
+    min-height: 120px;    /* Define uma altura mínima para o campo */
+}
+
+/* --- Linha Divisória --- */
+.form-container hr {
+    border-top: 1px solid #4b5563;
+}
+/* --- Linha Divisória --- */
+.form-container hr {
+    border-top: 1px solid #4b5563;
+}
+
+/* --- Botão Primário (Ex: Salvar) --- */
+.btn-success-custom {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+}
+
+.btn-success-custom:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* --- Botão Secundário (Ex: Cancelar) --- */
+.local-btn {
+    background: transparent;
+    border: 1px solid #4b5563;
+    color: #9ca3af;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+}
+
+.local-btn:hover:not(:disabled) {
+    background: #374151;
+    border-color: #6b7280;
+    color: #f3f4f6;
+}
+
+/* --- Estilo para Mensagens de Erro de Validação --- */
+.invalid-feedback {
+    color: #fca5a5 !important; /* Vermelho claro para erros */
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* --- Estilo para Texto de Ajuda --- */
+.form-text {
+    color: #9ca3af !important; /* Cinza para textos de ajuda */
+}
+
+/* --- Estilo para Checkbox (Campo "Ativo") --- */
+.form-check-input.form-control-custom {
+    /* O Django pode aplicar ambas as classes, então garantimos o estilo correto */
+    background-color: #374151;
+    border: 1px solid #4b5563;
+    height: 1.25em;
+    width: 1.25em;
+}
+
+.form-check-input.form-control-custom:checked {
+    background-color: #10b981; /* Verde quando marcado */
+    border-color: #10b981;
+}
+
+.form-check-input.form-control-custom:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25); /* Brilho verde no foco */
+}

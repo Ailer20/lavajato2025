@@ -1,0 +1,78 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}{{ action }}{% endblock %}
+
+{% block extra_css %}
+    <!-- Carregando os arquivos CSS. Isso está correto! -->
+    <link rel="stylesheet" href="{% static 'css/custom_form_theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            
+            <!-- 
+            ERRO ESTAVA AQUI: Trocamos 'card shadow-sm' por 'form-container'.
+            Esta é a mudança principal que aplica o fundo escuro.
+            -->
+            <div class="form-container"> 
+                
+                <!-- O título agora está dentro do form-container, então precisa da cor correta -->
+                <h3>{{ action }}</h3>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="row mb-4 align-items-center"> <!-- Aumentei um pouco a margem para mb-4 -->
+                            
+                            <!-- 
+                            ERRO ESTAVA AQUI: Trocamos 'col-form-label' por 'form-label-custom'.
+                            Isso vai deixar os rótulos brancos e em maiúsculas.
+                            -->
+                            <label for="{{ field.id_for_label }}" class="col-sm-3 text-sm-end form-label-custom">
+                                {{ field.label }}
+                            </label>
+                            <div class="col-sm-9">
+                                <!-- 
+                                IMPORTANTE: O campo {{ field }} precisa receber a classe 'form-control-custom'
+                                a partir do seu arquivo forms.py para ter o estilo escuro.
+                                -->
+                                {{ field }}
+                                
+                                {% if field.help_text %}
+                                    <small class="form-text">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-sm-9 offset-sm-3 d-flex align-items-center">
+                            <!-- 
+                            ERRO ESTAVA AQUI: Trocamos 'btn btn-primary' e 'btn btn-secondary'
+                            pelas nossas classes personalizadas.
+                            -->
+                            <button type="submit" class="btn btn-success-custom me-2">
+                                <i class="fas fa-save me-1"></i>
+                                Salvar
+                            </button>
+                            <a href="{% url 'cliente_list' %}" class="btn local-btn">Cancelar</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

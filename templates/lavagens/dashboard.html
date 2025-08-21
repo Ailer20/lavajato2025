@@ -1,0 +1,351 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Lava Jato 2025{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header com filtros -->
+    <div class="search-container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2 class="mb-3">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    REGISTROS
+                </h2>
+                
+                <!-- Filtros de busca -->
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" 
+                               class="form-control form-control-custom" 
+                               name="search" 
+                               value="{{ search_query }}"
+                               placeholder="Buscar por código, placa, cliente...">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-control form-control-custom" name="status">
+                            <option value="">Todos os Status</option>
+                            <option value="EM_ANDAMENTO" {% if status_filter == 'EM_ANDAMENTO' %}selected{% endif %}>Em Andamento</option>
+                            <option value="CONCLUIDA" {% if status_filter == 'CONCLUIDA' %}selected{% endif %}>Concluída</option>
+                            <option value="CANCELADA" {% if status_filter == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-control form-control-custom" name="base">
+                            <option value="">Todas as Bases</option>
+                            {% for base in bases %}
+                                <option value="{{ base.id }}" {% if base_filter == base.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ base.nome }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary-custom w-100">
+                            <i class="fas fa-search me-1"></i>
+                            Buscar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'nova_lavagem' %}" class="btn btn-success-custom btn-lg">
+                    <i class="fas fa-plus me-2"></i>
+                    Nova Lavagem
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <h3 class="text-warning">{{ total_andamento }}</h3>
+                    <p class="mb-0">Lavagens em Andamento</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-custom">
+                <div class="card-body text-center">
+                    <h3 class="text-success">{{ total_concluidas }}</h3>
+                    <p class="mb-0">Lavagens Concluídas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lavagens em Andamento -->
+    <div class="card-custom mb-4">
+        <div class="card-header-custom">
+            <h4 class="mb-0">
+                <i class="fas fa-clock me-2"></i>
+                LAVAGEM EM ANDAMENTO
+                <span class="badge bg-warning ms-2">{{ total_andamento }}</span>
+            </h4>
+        </div>
+        <div class="card-body p-0">
+            {% if lavagens_andamento %}
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>HORA INÍCIO</th>
+                                <th>TIPO DE LAVAGEM</th>
+                                <th>BASE</th>
+                                <th>LOCAL</th>
+                                <th>PLACA VEÍCULO</th>
+                                <th>TRANSPORTES/EQUIPAMENTOS</th>
+                                <th>HORA TÉRMINO</th>
+                                <th>DATA</th>
+                                <th>AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lavagem in lavagens_andamento %}
+                                <tr>
+                                    <td>
+                                        <span class="status-badge status-em-andamento">
+                                            {{ lavagem.codigo }}
+                                        </span>
+                                    </td>
+                                    <td>{{ lavagem.hora_inicio|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ lavagem.tipo_lavagem.get_nome_display }}</td>
+                                    <td>{{ lavagem.base.nome }}</td>
+                                    <td>{{ lavagem.local.get_nome_display }}</td>
+                                    <td>
+                                        <strong>{{ lavagem.placa_veiculo }}</strong>
+                                    </td>
+                                    <td>{{ lavagem.transporte_equipamento.get_nome_display }}</td>
+                                    <td>
+                                        {% if lavagem.hora_termino %}
+                                            {{ lavagem.hora_termino|date:"d/m/Y H:i" }}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ lavagem.data_lavagem|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'detalhes_lavagem' lavagem.id %}" 
+                                               class="btn btn-sm btn-outline-info" 
+                                               title="Ver detalhes">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <form method="POST" action="{% url 'concluir_lavagem' lavagem.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" 
+                                                        class="btn btn-sm btn-success-custom" 
+                                                        title="Concluir lavagem"
+                                                        onclick="return confirm('Confirma a conclusão desta lavagem?')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-danger-custom" 
+                                                    title="Cancelar lavagem"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#cancelModal{{ lavagem.id }}">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- Modal de cancelamento -->
+                                        <div class="modal fade" id="cancelModal{{ lavagem.id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content bg-dark">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Cancelar Lavagem</h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <form method="POST" action="{% url 'cancelar_lavagem' lavagem.id %}">
+                                                        {% csrf_token %}
+                                                        <div class="modal-body">
+                                                            <p>Tem certeza que deseja cancelar a lavagem <strong>{{ lavagem.codigo }}</strong>?</p>
+                                                            <div class="mb-3">
+                                                                <label class="form-label-custom">Motivo do cancelamento:</label>
+                                                                <textarea class="form-control form-control-custom" 
+                                                                          name="motivo" 
+                                                                          rows="3" 
+                                                                          placeholder="Digite o motivo do cancelamento..."></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                            <button type="submit" class="btn btn-danger-custom">Confirmar Cancelamento</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhuma lavagem em andamento</h5>
+                    <p class="text-muted">Todas as lavagens foram concluídas ou não há registros.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Lavagens Concluídas -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h4 class="mb-0">
+                <i class="fas fa-check-circle me-2"></i>
+                LAVAGEM CONCLUÍDA
+                <span class="badge bg-success ms-2">{{ total_concluidas }}</span>
+            </h4>
+        </div>
+        <div class="card-body p-0">
+            {% if lavagens_concluidas %}
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>HORA INÍCIO</th>
+                                <th>TIPO DE LAVAGEM</th>
+                                <th>BASE</th>
+                                <th>LOCAL</th>
+                                <th>PLACA VEÍCULO</th>
+                                <th>TRANSPORTES/EQUIPAMENTOS</th>
+                                <th>HORA TÉRMINO</th>
+                                <th>DATA</th>
+                                <th>LAVADOR</th>
+                                <th>STATUS</th>
+                                <th>AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lavagem in lavagens_concluidas %}
+                                <tr>
+                                    <td>
+                                        <span class="status-badge status-concluida">
+                                            {{ lavagem.codigo }}
+                                        </span>
+                                    </td>
+                                    <td>{{ lavagem.hora_inicio|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ lavagem.tipo_lavagem.get_nome_display }}</td>
+                                    <td>{{ lavagem.base.nome }}</td>
+                                    <td>{{ lavagem.local.get_nome_display }}</td>
+                                    <td>
+                                        <strong>{{ lavagem.placa_veiculo }}</strong>
+                                    </td>
+                                    <td>{{ lavagem.transporte_equipamento.get_nome_display }}</td>
+                                    <td>
+                                        {% if lavagem.hora_termino %}
+                                            {{ lavagem.hora_termino|date:"d/m/Y H:i" }}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ lavagem.data_lavagem|date:"d/m/Y" }}</td>
+                                    <td>
+                                        {% if lavagem.lavador %}
+                                            {{ lavagem.lavador.nome }}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-concluida">
+                                            LAVAGEM CONCLUÍDA
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'detalhes_lavagem' lavagem.id %}" 
+                                           class="btn btn-sm btn-outline-info" 
+                                           title="Ver detalhes">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                {% if lavagens_concluidas.has_other_pages %}
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav>
+                            <ul class="pagination">
+                                {% if lavagens_concluidas.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link bg-dark border-secondary text-light" 
+                                           href="?page_concluidas={{ lavagens_concluidas.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if base_filter %}&base={{ base_filter }}{% endif %}">
+                                            Anterior
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                
+                                <li class="page-item active">
+                                    <span class="page-link bg-primary border-primary">
+                                        {{ lavagens_concluidas.number }} de {{ lavagens_concluidas.paginator.num_pages }}
+                                    </span>
+                                </li>
+                                
+                                {% if lavagens_concluidas.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link bg-dark border-secondary text-light" 
+                                           href="?page_concluidas={{ lavagens_concluidas.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if base_filter %}&base={{ base_filter }}{% endif %}">
+                                            Próxima
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhuma lavagem concluída</h5>
+                    <p class="text-muted">Ainda não há lavagens concluídas para exibir.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh da página a cada 30 segundos para lavagens em andamento
+    setTimeout(function() {
+        if ({{ total_andamento }} > 0) {
+            location.reload();
+        }
+    }, 30000);
+
+    // Animação de entrada para as tabelas
+    document.addEventListener('DOMContentLoaded', function() {
+        const tables = document.querySelectorAll('.table-custom tbody tr');
+        tables.forEach((row, index) => {
+            row.style.opacity = '0';
+            row.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                row.style.transition = 'all 0.3s ease';
+                row.style.opacity = '1';
+                row.style.transform = 'translateY(0)';
+            }, index * 50);
+        });
+    });
+</script>
+{% endblock %}
+

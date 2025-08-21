@@ -1,0 +1,39 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Tipos de Lavagem{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Lista de Tipos de Lavagem</h2>
+    <a href="{% url 'tipo_lavagem_create' %}" class="btn btn-primary mb-3">Adicionar Novo Tipo de Lavagem</a>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Preço Base</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tipo_lavagem in tipos_lavagem %}
+                <tr>
+                    <td>{{ tipo_lavagem.nome }}</td>
+                    <td>R$ {{ tipo_lavagem.preco_base|floatformat:2 }}</td>
+                    <td>
+                        <a href="{% url 'tipo_lavagem_update' tipo_lavagem.pk %}" class="btn btn-sm btn-info">Editar</a>
+                        <a href="{% url 'tipo_lavagem_delete' tipo_lavagem.pk %}" class="btn btn-sm btn-danger">Excluir</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">Nenhum tipo de lavagem cadastrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+

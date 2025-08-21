@@ -1,0 +1,381 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Detalhes da Lavagem {{ lavagem.codigo }} - Lava Jato 2025{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h4 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Detalhes da Lavagem - {{ lavagem.codigo }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Informações Básicas -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-clipboard-list me-2"></i>
+                                Informações Básicas
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label-custom">Código:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    <span class="status-badge status-{{ lavagem.status|lower|cut:'_' }}">
+                                        {{ lavagem.codigo }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label-custom">Status:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    <span class="status-badge status-{{ lavagem.status|lower|cut:'_' }}">
+                                        {{ lavagem.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label-custom">Data da Lavagem:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    {{ lavagem.data_lavagem|date:"d/m/Y" }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label-custom">Tipo de Lavagem:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    {{ lavagem.tipo_lavagem.get_nome_display }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Local e Veículo -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                Local e Veículo
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label-custom">Base:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    {{ lavagem.base.nome }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label-custom">Local:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    {{ lavagem.local.get_nome_display }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label-custom">Placa do Veículo:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    <strong class="text-warning">{{ lavagem.placa_veiculo }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label-custom">Transporte/Equipamento:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    {{ lavagem.transporte_equipamento.get_nome_display }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Horários -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-clock me-2"></i>
+                                Horários
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label-custom">Hora de Início:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    {{ lavagem.hora_inicio|date:"d/m/Y H:i" }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label-custom">Hora de Término:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    {% if lavagem.hora_termino %}
+                                        {{ lavagem.hora_termino|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        <span class="text-muted">Em andamento</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label-custom">Duração:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    {% if lavagem.duracao_lavagem %}
+                                        <span class="text-success">{{ lavagem.duracao_lavagem }} minutos</span>
+                                    {% else %}
+                                        <span class="text-warning">Em andamento</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Valores e Responsável -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-dollar-sign me-2"></i>
+                                Valores e Responsável
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label-custom">Lavador:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    {% if lavagem.lavador %}
+                                        {{ lavagem.lavador.nome }}
+                                    {% else %}
+                                        <span class="text-muted">Não informado</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label-custom">Valor do Serviço:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    {% if lavagem.valor_servico %}
+                                        <span class="text-success">R$ {{ lavagem.valor_servico }}</span>
+                                    {% else %}
+                                        <span class="text-muted">Não informado</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label-custom">Valor Final:</label>
+                                <div class="p-2 bg-dark rounded">
+                                    {% if lavagem.valor_final %}
+                                        <span class="text-success h5">R$ {{ lavagem.valor_final }}</span>
+                                    {% else %}
+                                        <span class="text-muted">Não calculado</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observações -->
+                    {% if lavagem.observacoes %}
+                    <div class="mb-4">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-comment me-2"></i>
+                            Observações
+                        </h5>
+                        <div class="p-3 bg-dark rounded">
+                            {{ lavagem.observacoes|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Informações do Cliente/Veículo -->
+                    {% if lavagem.cliente or lavagem.veiculo %}
+                    <div class="mb-4">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-user me-2"></i>
+                            Informações do Cliente/Veículo
+                        </h5>
+                        <div class="row">
+                            {% if lavagem.cliente %}
+                            <div class="col-md-6">
+                                <div class="p-3 bg-dark rounded">
+                                    <h6 class="text-warning">Cliente</h6>
+                                    <p class="mb-1"><strong>Nome:</strong> {{ lavagem.cliente.nome }}</p>
+                                    {% if lavagem.cliente.telefone %}
+                                        <p class="mb-1"><strong>Telefone:</strong> {{ lavagem.cliente.telefone }}</p>
+                                    {% endif %}
+                                    {% if lavagem.cliente.email %}
+                                        <p class="mb-0"><strong>E-mail:</strong> {{ lavagem.cliente.email }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if lavagem.veiculo %}
+                            <div class="col-md-6">
+                                <div class="p-3 bg-dark rounded">
+                                    <h6 class="text-warning">Veículo</h6>
+                                    <p class="mb-1"><strong>Marca/Modelo:</strong> {{ lavagem.veiculo.marca }} {{ lavagem.veiculo.modelo }}</p>
+                                    {% if lavagem.veiculo.ano %}
+                                        <p class="mb-1"><strong>Ano:</strong> {{ lavagem.veiculo.ano }}</p>
+                                    {% endif %}
+                                    {% if lavagem.veiculo.cor %}
+                                        <p class="mb-0"><strong>Cor:</strong> {{ lavagem.veiculo.cor }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Botões de Ação -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <a href="{% url 'dashboard' %}" class="btn btn-secondary w-100">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Voltar
+                            </a>
+                        </div>
+                        
+                        {% if lavagem.status == 'EM_ANDAMENTO' %}
+                        <div class="col-md-4">
+                            <form method="POST" action="{% url 'concluir_lavagem' lavagem.id %}" class="d-inline w-100">
+                                {% csrf_token %}
+                                <button type="submit" 
+                                        class="btn btn-success-custom w-100"
+                                        onclick="return confirm('Confirma a conclusão desta lavagem?')">
+                                    <i class="fas fa-check me-2"></i>
+                                    Concluir
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" 
+                                    class="btn btn-danger-custom w-100" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#cancelModal">
+                                <i class="fas fa-times me-2"></i>
+                                Cancelar
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar com informações adicionais -->
+        <div class="col-lg-4">
+            <div class="card-custom mb-4">
+                <div class="card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Estatísticas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="mb-3">
+                            <h6 class="text-muted">Tempo Decorrido</h6>
+                            {% if lavagem.duracao_lavagem %}
+                                <h4 class="text-success">{{ lavagem.duracao_lavagem }} min</h4>
+                            {% else %}
+                                <h4 class="text-warning" id="tempo-decorrido">Calculando...</h4>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="text-muted">Status</h6>
+                            <span class="status-badge status-{{ lavagem.status|lower|cut:'_' }}">
+                                {{ lavagem.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integração Protheus -->
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-sync me-2"></i>
+                        Integração Protheus
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        {% if lavagem.protheus_enviado %}
+                            <div class="text-success mb-3">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                                <h6 class="mt-2">Enviado com Sucesso</h6>
+                                {% if lavagem.protheus_numero_os %}
+                                    <small class="text-muted">OS: {{ lavagem.protheus_numero_os }}</small>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="text-warning mb-3">
+                                <i class="fas fa-clock fa-2x"></i>
+                                <h6 class="mt-2">Aguardando Envio</h6>
+                                <small class="text-muted">Será enviado automaticamente</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de cancelamento -->
+{% if lavagem.status == 'EM_ANDAMENTO' %}
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancelar Lavagem</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'cancelar_lavagem' lavagem.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p>Tem certeza que deseja cancelar a lavagem <strong>{{ lavagem.codigo }}</strong>?</p>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Motivo do cancelamento:</label>
+                        <textarea class="form-control form-control-custom" 
+                                  name="motivo" 
+                                  rows="3" 
+                                  placeholder="Digite o motivo do cancelamento..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger-custom">Confirmar Cancelamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+{% if lavagem.status == 'EM_ANDAMENTO' %}
+// Atualizar tempo decorrido em tempo real
+function atualizarTempo() {
+    const inicio = new Date('{{ lavagem.hora_inicio|date:"c" }}');
+    const agora = new Date();
+    const diff = Math.floor((agora - inicio) / 1000 / 60); // em minutos
+    
+    document.getElementById('tempo-decorrido').textContent = diff + ' min';
+}
+
+// Atualizar a cada minuto
+setInterval(atualizarTempo, 60000);
+atualizarTempo(); // Executar imediatamente
+{% endif %}
+</script>
+{% endblock %}
+

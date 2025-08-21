@@ -1,0 +1,354 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Nova Lavagem - Lava Jato 2025{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h4 class="mb-0">
+                        <i class="fas fa-plus me-2"></i>
+                        Nova Lavagem
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" id="novaLavagemForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- ID (será gerado automaticamente) -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label-custom">ID</label>
+                                <input type="text" 
+                                       class="form-control form-control-custom" 
+                                       value="Será gerado automaticamente" 
+                                       readonly>
+                            </div>
+
+                            <!-- Hora Início -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label-custom">HORA INÍCIO</label>
+                                <input type="datetime-local" 
+                                       class="form-control form-control-custom" 
+                                       name="hora_inicio"
+                                       id="hora_inicio">
+                            </div>
+                        </div>
+
+                        <!-- Tipo de Lavagem -->
+                        <div class="mb-3">
+                            <label class="form-label-custom">TIPO DE LAVAGEM *</label>
+                            <select class="form-control form-control-custom" name="tipo_lavagem" required>
+                                <option value="">Selecione o tipo de lavagem</option>
+                                {% for tipo in tipos_lavagem %}
+                                    <option value="{{ tipo.id }}" data-preco="{{ tipo.preco_base }}">
+                                        {{ tipo.get_nome_display }} - R$ {{ tipo.preco_base }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Base -->
+                        <div class="mb-3">
+                            <label class="form-label-custom">BASE *</label>
+                            <select class="form-control form-control-custom" name="base" id="base_select" required>
+                                <option value="">Selecione a base</option>
+                                {% for base in bases %}
+                                    <option value="{{ base.id }}">{{ base.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Local -->
+                        <div class="mb-3">
+                            <label class="form-label-custom">LOCAL *</label>
+                            <div class="btn-group w-100" role="group" id="local_buttons">
+                                <input type="hidden" name="local" id="local_hidden">
+                                <button type="button" class="btn btn-outline-light local-btn" data-value="1" disabled>
+                                    DICK 1
+                                </button>
+                                <button type="button" class="btn btn-outline-light local-btn" data-value="2" disabled>
+                                    DICK 2
+                                </button>
+                                <button type="button" class="btn btn-outline-light local-btn" data-value="3" disabled>
+                                    BASES
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Placa Veículo -->
+                        <div class="mb-3">
+                            <label class="form-label-custom">PLACA VEÍCULO *</label>
+                            <input type="text" 
+                                   class="form-control form-control-custom" 
+                                   name="placa_veiculo"
+                                   id="placa_veiculo"
+                                   placeholder="Digite a placa do veículo"
+                                   maxlength="10"
+                                   required>
+                            <div id="veiculo_info" class="mt-2" style="display: none;">
+                                <div class="alert alert-info-custom">
+                                    <strong>Veículo encontrado:</strong>
+                                    <div id="veiculo_detalhes"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transportes/Equipamentos -->
+                        <div class="mb-3">
+                            <label class="form-label-custom">TRANSPORTES/EQUIPAMENTOS *</label>
+                            <select class="form-control form-control-custom" name="transporte_equipamento" required>
+                                <option value="">Selecione o tipo de transporte/equipamento</option>
+                                {% for transporte in transportes_equipamentos %}
+                                    <option value="{{ transporte.id }}" data-multiplicador="{{ transporte.multiplicador_preco }}">
+                                        {{ transporte.get_nome_display }}
+                                        {% if transporte.multiplicador_preco != 1.0 %}
+                                            (x{{ transporte.multiplicador_preco }})
+                                        {% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Hora Término -->
+                        <div class="mb-3">
+                            <label class="form-label-custom">HORA TÉRMINO</label>
+                            <input type="datetime-local" 
+                                   class="form-control form-control-custom" 
+                                   name="hora_termino"
+                                   placeholder="Será preenchido automaticamente ao concluir">
+                        </div>
+
+                        <!-- Data -->
+                        <div class="mb-3">
+                            <label class="form-label-custom">DATA</label>
+                            <input type="date" 
+                                   class="form-control form-control-custom" 
+                                   name="data"
+                                   id="data_lavagem">
+                        </div>
+
+                        <!-- Lavador -->
+                        <div class="mb-3">
+                            <label class="form-label-custom">LAVADOR</label>
+                            <select class="form-control form-control-custom" name="lavador">
+                                <option value="">Selecione o lavador</option>
+                                {% for lavador in lavadores %}
+                                    <option value="{{ lavador.id }}">{{ lavador.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mb-3">
+                            <label class="form-label-custom">STATUS</label>
+                            <select class="form-control form-control-custom" name="status" disabled>
+                                <option value="EM_ANDAMENTO" selected>LAVAGEM EM ANDAMENTO</option>
+                            </select>
+                            <small class="text-muted">O status inicial será sempre "Em Andamento"</small>
+                        </div>
+
+                        <!-- Contrato -->
+                        <div class="mb-3">
+                            <label class="form-label-custom">CONTRATO</label>
+                            <input type="text" 
+                                   class="form-control form-control-custom" 
+                                   name="contrato"
+                                   placeholder="Número ou código do contrato (opcional)">
+                        </div>
+
+                        <!-- Observações -->
+                        <div class="mb-4">
+                            <label class="form-label-custom">OBSERVAÇÕES</label>
+                            <textarea class="form-control form-control-custom" 
+                                      name="observacoes" 
+                                      rows="4" 
+                                      placeholder="Digite observações sobre a lavagem..."></textarea>
+                        </div>
+
+                        <!-- Valor estimado -->
+                        <div class="mb-4">
+                            <div class="alert alert-info-custom">
+                                <h6><i class="fas fa-calculator me-2"></i>Valor Estimado</h6>
+                                <div id="valor_estimado">
+                                    <span class="text-muted">Selecione o tipo de lavagem e equipamento para calcular</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a href="{% url 'dashboard' %}" class="btn btn-secondary w-100">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Cancelar
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-success-custom w-100">
+                                    <i class="fas fa-save me-2"></i>
+                                    Salvar Lavagem
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Definir data e hora atuais
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const currentDateTime = now.toISOString().slice(0, 16);
+    
+    $('#data_lavagem').val(today);
+    $('#hora_inicio').val(currentDateTime);
+
+    // Carregar locais quando base for selecionada
+    $('#base_select').change(function() {
+        const baseId = $(this).val();
+        const localButtons = $('.local-btn');
+        
+        // Resetar botões
+        localButtons.removeClass('active btn-primary').addClass('btn-outline-light').prop('disabled', true);
+        $('#local_hidden').val('');
+        
+        if (baseId) {
+            $.get('/api/locais-por-base/', {base_id: baseId}, function(data) {
+                localButtons.prop('disabled', false);
+                
+                // Habilitar apenas os locais disponíveis para esta base
+                data.locais.forEach(function(local) {
+                    const button = $(`.local-btn[data-value="${local.id}"]`);
+                    button.prop('disabled', false);
+                });
+            });
+        }
+    });
+
+    // Seleção de local
+    $('.local-btn').click(function() {
+        if (!$(this).prop('disabled')) {
+            $('.local-btn').removeClass('active btn-primary').addClass('btn-outline-light');
+            $(this).removeClass('btn-outline-light').addClass('active btn-primary');
+            $('#local_hidden').val($(this).data('value'));
+        }
+    });
+
+    // Buscar informações do veículo pela placa
+    let searchTimeout;
+    $('#placa_veiculo').on('input', function() {
+        const placa = $(this).val().toUpperCase();
+        $(this).val(placa);
+        
+        clearTimeout(searchTimeout);
+        
+        if (placa.length >= 7) {
+            searchTimeout = setTimeout(function() {
+                $.get('/api/buscar-veiculo/', {placa: placa}, function(data) {
+                    if (data.found) {
+                        $('#veiculo_detalhes').html(`
+                            <strong>${data.veiculo.marca} ${data.veiculo.modelo}</strong> (${data.veiculo.ano})<br>
+                            Cor: ${data.veiculo.cor} | Tipo: ${data.veiculo.tipo}
+                            ${data.cliente ? `<br>Cliente: ${data.cliente.nome}` : ''}
+                        `);
+                        $('#veiculo_info').show();
+                    } else {
+                        $('#veiculo_info').hide();
+                    }
+                });
+            }, 500);
+        } else {
+            $('#veiculo_info').hide();
+        }
+    });
+
+    // Calcular valor estimado
+    function calcularValor() {
+        const tipoLavagem = $('select[name="tipo_lavagem"] option:selected');
+        const transporte = $('select[name="transporte_equipamento"] option:selected');
+        
+        if (tipoLavagem.val() && transporte.val()) {
+            const precoBase = parseFloat(tipoLavagem.data('preco')) || 0;
+            const multiplicador = parseFloat(transporte.data('multiplicador')) || 1;
+            const valorFinal = precoBase * multiplicador;
+            
+            $("#valor_estimado").html(`
+                <div class="row">
+                    <div class="col-12">
+                        <small class="text-muted">${tipoLavagem.text().split(' - ')[0]} x ${transporte.text().split('(')[0]}</small><br>
+                        <strong>R$ ${valorFinal.toFixed(2)}</strong>
+                    </div>
+                </div>
+            `);
+        } else {
+            $('#valor_estimado').html('<span class="text-muted">Selecione o tipo de lavagem e equipamento para calcular</span>');
+        }
+    }
+
+    $('select[name="tipo_lavagem"], select[name="transporte_equipamento"]').change(calcularValor);
+
+    // Validação do formulário
+    $('#novaLavagemForm').submit(function(e) {
+        const local = $('#local_hidden').val();
+        if (!local) {
+            e.preventDefault();
+            alert('Por favor, selecione um local.');
+            return false;
+        }
+    });
+
+    // Formatação da placa (padrão brasileiro)
+    $('#placa_veiculo').on('input', function() {
+        let value = $(this).val().replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+        
+        if (value.length > 3) {
+            value = value.substring(0, 3) + '-' + value.substring(3, 7);
+        }
+        
+        $(this).val(value);
+    });
+});
+</script>
+
+<style>
+.alert-info-custom {
+    background-color: rgba(13, 202, 240, 0.1);
+    color: #0dcaf0;
+    border-left: 4px solid #0dcaf0;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.local-btn.active {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.local-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.local-btn:not(:disabled):hover {
+    background-color: rgba(59, 76, 184, 0.1);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+</style>
+{% endblock %}
+

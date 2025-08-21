@@ -1,0 +1,66 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}{{ action }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <!-- Carregamos o mesmo arquivo CSS. Ele já tem tudo o que precisamos. -->
+    <link rel="stylesheet" href="{% static 'css/custom_form_theme.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            
+            <!-- 1. Usamos a classe 'form-container' para aplicar o tema escuro. -->
+            <div class="form-container"> 
+                
+                <h3>{{ action }}</h3>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="row mb-4 align-items-center">
+                            
+                            <!-- 2. Usamos 'form-label-custom' para o estilo dos rótulos. -->
+                            <label for="{{ field.id_for_label }}" class="col-sm-3 text-sm-end form-label-custom">
+                                {{ field.label }}
+                            </label>
+                            <div class="col-sm-9">
+                                <!-- O campo {{ field }} receberá a classe 'form-control-custom' do forms.py -->
+                                {{ field }}
+                                
+                                {% if field.help_text %}
+                                    <small class="form-text">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-sm-9 offset-sm-3 d-flex align-items-center">
+                            <!-- 3. Usamos 'btn-success-custom' e 'local-btn' para os botões. -->
+                            <button type="submit" class="btn btn-success-custom me-2">
+                                <i class="fas fa-save me-1"></i> <!-- Ícone opcional -->
+                                Salvar
+                            </button>
+                            <!-- ATENÇÃO: O link de 'Cancelar' deve apontar para a lista correta. -->
+                            <a href="{% url 'lavador_list' %}" class="btn local-btn">Cancelar</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Lavadores{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Lista de Lavadores</h2>
+    <a href="{% url 'lavador_create' %}" class="btn btn-primary mb-3">Adicionar Novo Lavador</a>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Telefone</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lavador in lavadores %}
+                <tr>
+                    <td>{{ lavador.nome }}</td>
+                    <td>{{ lavador.cpf }}</td>
+                    <td>{{ lavador.telefone }}</td>
+                    <td>
+                        <a href="{% url 'lavador_update' lavador.pk %}" class="btn btn-sm btn-info">Editar</a>
+                        <a href="{% url 'lavador_delete' lavador.pk %}" class="btn btn-sm btn-danger">Excluir</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">Nenhum lavador cadastrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+

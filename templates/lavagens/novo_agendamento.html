@@ -1,0 +1,394 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Novo Agendamento - Lava Jato 2025{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/novo_agendamento.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <h1 class="text-white mb-1">
+                    <i class="fas fa-calendar-plus me-3"></i>
+                    Novo Agendamento
+                </h1>
+                <p class="text-muted mb-0">Agende uma nova lavagem</p>
+            </div>
+
+            <!-- Formulário -->
+            <div class="form-container">
+                <form method="POST" id="agendamentoForm">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <!-- Cliente -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-custom">CLIENTE *</label>
+                            <select class="form-control form-control-custom" name="cliente" id="cliente_select" required>
+                                <option value="">Selecione o cliente</option>
+                                {% for cliente in clientes %}
+                                    <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Placa Veículo -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-custom">PLACA VEÍCULO *</label>
+                            <input type="text" 
+                                   class="form-control form-control-custom" 
+                                   name="placa_veiculo"
+                                   id="placa_veiculo"
+                                   placeholder="Digite a placa do veículo"
+                                   maxlength="10"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Data do Agendamento -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-custom">DATA DO AGENDAMENTO *</label>
+                            <input type="date" 
+                                   class="form-control form-control-custom" 
+                                   name="data_agendamento"
+                                   id="data_agendamento"
+                                   min="{{ data_hoje }}"
+                                   required>
+                        </div>
+
+                        <!-- Hora do Agendamento -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-custom">HORA DO AGENDAMENTO *</label>
+                            <input type="time" 
+                                   class="form-control form-control-custom" 
+                                   name="hora_agendamento"
+                                   id="hora_agendamento"
+                                   min="06:00"
+                                   max="18:00"
+                                   required>
+                            <small class="text-muted">Horário de funcionamento: 6h às 18h</small>
+                        </div>
+                    </div>
+
+                    <!-- Base -->
+                    <div class="mb-3">
+                        <label class="form-label-custom">BASE *</label>
+                        <select class="form-control form-control-custom" name="base" id="base_select" required>
+                            <option value="">Selecione a base</option>
+                            {% for base in bases %}
+                                <option value="{{ base.id }}">{{ base.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Local -->
+                    <div class="mb-3">
+                        <label class="form-label-custom">LOCAL *</label>
+                        <div class="btn-group w-100" role="group" id="local_buttons">
+                            <input type="hidden" name="local" id="local_hidden">
+                            <button type="button" class="btn local-btn" data-value="1" disabled>
+                                DICK 1
+                            </button>
+                            <button type="button" class="btn local-btn" data-value="2" disabled>
+                                DICK 2
+                            </button>
+                            <button type="button" class="btn local-btn" data-value="3" disabled>
+                                BASES
+                            </button>
+                        </div>
+                        <div id="disponibilidade_status" style="display: none;"></div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Tipo de Lavagem -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-custom">TIPO DE LAVAGEM *</label>
+                            <select class="form-control form-control-custom" name="tipo_lavagem" id="tipo_lavagem" required>
+                                <option value="">Selecione o tipo de lavagem</option>
+                                {% for tipo in tipos_lavagem %}
+                                    <option value="{{ tipo.id }}" data-preco="{{ tipo.preco_base }}" data-tempo="{{ tipo.tempo_estimado }}">
+                                        {{ tipo.get_nome_display }} - R$ {{ tipo.preco_base|floatformat:2 }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Transportes/Equipamentos -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-custom">TRANSPORTES/EQUIPAMENTOS *</label>
+                            <select class="form-control form-control-custom" name="transporte_equipamento" id="transporte_equipamento" required>
+                                <option value="">Selecione o tipo de transporte/equipamento</option>
+                                {% for transporte in transportes_equipamentos %}
+                                    <option value="{{ transporte.id }}" data-multiplicador="{{ transporte.multiplicador_preco }}">
+                                        {{ transporte.get_nome_display }}
+                                        {% if transporte.multiplicador_preco != 1.0 %}
+                                            (x{{ transporte.multiplicador_preco }})
+                                        {% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Duração Estimada -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-custom">DURAÇÃO ESTIMADA (MINUTOS)</label>
+                            <input type="number" 
+                                   class="form-control form-control-custom" 
+                                   name="duracao_estimada"
+                                   id="duracao_estimada"
+                                   min="15"
+                                   max="240"
+                                   value="30">
+                        </div>
+
+                        <!-- Lavador -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-custom">LAVADOR</label>
+                            <select class="form-control form-control-custom" name="lavador">
+                                <option value="">Selecione o lavador (opcional)</option>
+                                {% for lavador in lavadores %}
+                                    <option value="{{ lavador.id }}">{{ lavador.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Prioridade -->
+                    <div class="mb-3">
+                        <label class="form-label-custom">PRIORIDADE</label>
+                        <div class="d-flex flex-wrap">
+                            <input type="hidden" name="prioridade" id="prioridade_hidden" value="NORMAL">
+                            <button type="button" class="prioridade-btn prioridade-baixa" data-value="BAIXA">
+                                <i class="fas fa-arrow-down me-1"></i> Baixa
+                            </button>
+                            <button type="button" class="prioridade-btn prioridade-normal active" data-value="NORMAL">
+                                <i class="fas fa-minus me-1"></i> Normal
+                            </button>
+                            <button type="button" class="prioridade-btn prioridade-alta" data-value="ALTA">
+                                <i class="fas fa-arrow-up me-1"></i> Alta
+                            </button>
+                            <button type="button" class="prioridade-btn prioridade-urgente" data-value="URGENTE">
+                                <i class="fas fa-exclamation me-1"></i> Urgente
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Telefone de Contato -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-custom">TELEFONE DE CONTATO</label>
+                            <input type="tel" 
+                                   class="form-control form-control-custom" 
+                                   name="telefone_contato"
+                                   placeholder="(11) 99999-9999">
+                        </div>
+
+                        <!-- Email de Contato -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-custom">EMAIL DE CONTATO</label>
+                            <input type="email" 
+                                   class="form-control form-control-custom" 
+                                   name="email_contato"
+                                   placeholder="cliente@email.com">
+                        </div>
+                    </div>
+
+                    <!-- Observações -->
+                    <div class="mb-4">
+                        <label class="form-label-custom">OBSERVAÇÕES</label>
+                        <textarea class="form-control form-control-custom" 
+                                  name="observacoes" 
+                                  rows="3" 
+                                  placeholder="Observações sobre o agendamento..."></textarea>
+                    </div>
+
+                    <!-- Valor estimado -->
+                    <div class="mb-4">
+                        <div class="alert alert-info-custom">
+                            <h6><i class="fas fa-calculator me-2"></i>Valor Estimado</h6>
+                            <div id="valor_estimado">
+                                <span class="text-muted">Selecione o tipo de lavagem e equipamento para calcular</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{% url 'agendamentos_dashboard' %}" class="btn btn-secondary w-100">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Cancelar
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-success-custom w-100">
+                                <i class="fas fa-calendar-check me-2"></i>
+                                Agendar Lavagem
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Definir data mínima como hoje
+    const today = new Date().toISOString().split('T')[0];
+    $('#data_agendamento').val(today);
+    
+    // Definir hora atual
+    const now = new Date();
+    const currentTime = now.toTimeString().slice(0, 5);
+    $('#hora_agendamento').val(currentTime);
+
+    // Carregar locais quando base for selecionada
+    $('#base_select').change(function() {
+        const baseId = $(this).val();
+        const localButtons = $('#local_buttons .local-btn');
+        
+        if (baseId) {
+            // Habilitar botões de local
+            localButtons.prop('disabled', false);
+            
+            // Limpar seleção anterior
+            localButtons.removeClass('active');
+            $('#local_hidden').val('');
+            $('#disponibilidade_status').hide();
+        } else {
+            // Desabilitar botões de local
+            localButtons.prop('disabled', true).removeClass('active');
+            $('#local_hidden').val('');
+            $('#disponibilidade_status').hide();
+        }
+    });
+
+    // Seleção de local
+    $('.local-btn').click(function() {
+        if (!$(this).prop('disabled')) {
+            $('.local-btn').removeClass('active');
+            $(this).addClass('active');
+            $('#local_hidden').val($(this).data('value'));
+            
+            // Verificar disponibilidade
+            verificarDisponibilidade();
+        }
+    });
+
+    // Seleção de prioridade
+    $('.prioridade-btn').click(function() {
+        $('.prioridade-btn').removeClass('active');
+        $(this).addClass('active');
+        $('#prioridade_hidden').val($(this).data('value'));
+    });
+
+    // Calcular valor estimado
+    function calcularValorEstimado() {
+        const tipoLavagem = $('#tipo_lavagem option:selected');
+        const transporte = $('#transporte_equipamento option:selected');
+        
+        if (tipoLavagem.val() && transporte.val()) {
+            const precoBase = parseFloat(tipoLavagem.data('preco'));
+            const multiplicador = parseFloat(transporte.data('multiplicador'));
+            const valorTotal = precoBase * multiplicador;
+            
+            $('#valor_estimado').html(`
+                <strong>R$ ${valorTotal.toFixed(2)}</strong>
+                <small class="d-block text-muted">
+                    Base: R$ ${precoBase.toFixed(2)} × ${multiplicador} = R$ ${valorTotal.toFixed(2)}
+                </small>
+            `);
+            
+            // Atualizar duração estimada
+            const tempoEstimado = tipoLavagem.data('tempo');
+            if (tempoEstimado) {
+                $('#duracao_estimada').val(tempoEstimado);
+            }
+        } else {
+            $('#valor_estimado').html('<span class="text-muted">Selecione o tipo de lavagem e equipamento para calcular</span>');
+        }
+    }
+
+    $('#tipo_lavagem, #transporte_equipamento').change(calcularValorEstimado);
+
+    // Verificar disponibilidade de horário
+    function verificarDisponibilidade() {
+        const data = $('#data_agendamento').val();
+        const hora = $('#hora_agendamento').val();
+        const local = $('#local_hidden').val();
+        
+        if (data && hora && local) {
+            $.ajax({
+                url: '{% url "api_verificar_disponibilidade" %}',
+                method: 'POST',
+                data: JSON.stringify({
+                    data_agendamento: data,
+                    hora_agendamento: hora,
+                    local_id: local
+                }),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    const statusDiv = $('#disponibilidade_status');
+                    if (response.disponivel) {
+                        statusDiv.html(`
+                            <div class="disponibilidade-check disponivel">
+                                <i class="fas fa-check-circle me-2"></i>
+                                ${response.mensagem}
+                            </div>
+                        `).show();
+                    } else {
+                        statusDiv.html(`
+                            <div class="disponibilidade-check indisponivel">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                ${response.mensagem}
+                            </div>
+                        `).show();
+                    }
+                },
+                error: function() {
+                    $('#disponibilidade_status').hide();
+                }
+            });
+        }
+    }
+
+    $('#data_agendamento, #hora_agendamento').change(verificarDisponibilidade);
+
+    // Formatação de telefone
+    $('input[name="telefone_contato"]').on('input', function() {
+        let value = $(this).val().replace(/\D/g, '');
+        if (value.length >= 11) {
+            value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        } else if (value.length >= 7) {
+            value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+        } else if (value.length >= 3) {
+            value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+        }
+        $(this).val(value);
+    });
+
+    // Formatação de placa
+    $('#placa_veiculo').on('input', function() {
+        $(this).val($(this).val().toUpperCase());
+    });
+});
+</script>
+{% endblock %}
+
