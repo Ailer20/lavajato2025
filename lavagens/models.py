@@ -47,22 +47,54 @@ class Lavagem(models.Model):
             import random
             import string
             self.codigo = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
-        
-        #if self.hora_inicio and not self.data_lavagem:
-        #    self.data_lavagem = self.hora_inicio.date()
-        
+
         if self.valor_servico is not None:
             self.valor_final = self.valor_servico - (self.desconto or 0)
-        
+
         super().save(*args, **kwargs)
+
+        # --- LÓGICA DE SINCRONIZAÇÃO DE STATUS COM O AGENDAMENTO ---
+        # O 'hasattr' previne erros se a relação não existir por algum motivo.
+        # 'agendamento_origem' é o related_name que você definiu no modelo Agendamento.
+        if hasattr(self, 'agendamento_origem') and self.agendamento_origem:
+            agendamento = self.agendamento_origem
+            
+            # Mapeia o status da Lavagem para o status do Agendamento
+            # e só salva se houver mudança, para evitar loops.
+            if self.status == 'CONCLUIDA' and agendamento.status != 'CONCLUIDO':
+                agendamento.status = 'CONCLUIDO'
+                agendamento.save()
+            elif self.status == 'CANCELADA' and agendamento.status != 'CANCELADO':
+                agendamento.status = 'CANCELADO'
+                agendamento.save()
+            elif self.status == 'EM_ANDAMENTO' and agendamento.status != 'EM_ANDAMENTO':
+                agendamento.status = 'EM_ANDAMENTO'
+                agendamento.save()
+        
+        # Como já salvamos no início, não precisamos de outro super().save()
+        # Apenas retornamos para evitar o salvamento duplo que pode ocorrer em algumas versões do Django.
+        return
+
 
     @property
     def duracao_lavagem(self):
+        """Calcula a duração total em minutos APÓS a conclusão."""
         if self.hora_inicio and self.hora_termino:
             delta = self.hora_termino - self.hora_inicio
+            # Retorna 0 se a hora de término for antes da de início
+            if delta.total_seconds() < 0:
+                return 0
             return int(delta.total_seconds() / 60)
         return None
-
+    @property
+    def tempo_decorrido(self):
+        """Calcula o tempo decorrido em minutos para lavagens EM ANDAMENTO."""
+        if self.status == 'EM_ANDAMENTO' and self.hora_inicio:
+            # Calcula a diferença entre agora e a hora de início
+            delta = timezone.now() - self.hora_inicio
+            return int(delta.total_seconds() / 60)
+        return None
+    
     @property
     def esta_em_andamento(self):
         return self.status == "EM_ANDAMENTO"

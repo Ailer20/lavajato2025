@@ -113,11 +113,11 @@
                             <label class="form-label-custom">TIPO DE LAVAGEM *</label>
                             <select class="form-control form-control-custom" name="tipo_lavagem" id="tipo_lavagem" required>
                                 <option value="">Selecione o tipo de lavagem</option>
-                                {% for tipo in tipos_lavagem %}
-                                    <option value="{{ tipo.id }}" data-preco="{{ tipo.preco_base }}" data-tempo="{{ tipo.tempo_estimado }}">
-                                        {{ tipo.get_nome_display }} - R$ {{ tipo.preco_base|floatformat:2 }}
-                                    </option>
-                                {% endfor %}
+                                    {% for tipo in tipos_lavagem %}
+                                        <option value="{{ tipo.id }}" data-preco="{{ tipo.preco_base }}">
+                                            {{ tipo.nome }} - R$ {{ tipo.preco_base|floatformat:2 }} <!-- Use .nome aqui -->
+                                        </option>
+                                    {% endfor %}
                             </select>
                         </div>
 
@@ -128,7 +128,7 @@
                                 <option value="">Selecione o tipo de transporte/equipamento</option>
                                 {% for transporte in transportes_equipamentos %}
                                     <option value="{{ transporte.id }}" data-multiplicador="{{ transporte.multiplicador_preco }}">
-                                        {{ transporte.get_nome_display }}
+                                        {{ transporte.nome }}
                                         {% if transporte.multiplicador_preco != 1.0 %}
                                             (x{{ transporte.multiplicador_preco }})
                                         {% endif %}
@@ -219,6 +219,8 @@
                             <div id="valor_estimado">
                                 <span class="text-muted">Selecione o tipo de lavagem e equipamento para calcular</span>
                             </div>
+                            <!-- PASSO 1: ADICIONE ESTE CAMPO ESCONDIDO -->
+                            <input type="hidden" name="valor_estimado" id="valor_estimado_hidden">
                         </div>
                     </div>
 
@@ -313,16 +315,17 @@ $(document).ready(function() {
                 </small>
             `);
             
-            // Atualizar duração estimada
-            const tempoEstimado = tipoLavagem.data('tempo');
-            if (tempoEstimado) {
-                $('#duracao_estimada').val(tempoEstimado);
-            }
+            // --- PASSO 2: ATUALIZE O JAVASCRIPT PARA PREENCHER O CAMPO ---
+            $('#valor_estimado_hidden').val(valorTotal.toFixed(2));
+            
+            // ... (resto da sua função) ...
         } else {
             $('#valor_estimado').html('<span class="text-muted">Selecione o tipo de lavagem e equipamento para calcular</span>');
+            
+            // Limpe o campo escondido também
+            $('#valor_estimado_hidden').val('');
         }
     }
-
     $('#tipo_lavagem, #transporte_equipamento').change(calcularValorEstimado);
 
     // Verificar disponibilidade de horário

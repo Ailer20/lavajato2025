@@ -14,6 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from datetime import datetime, timedelta
 import json
 from clientes.models import Lavador
+from decimal import Decimal
 
 from .agendamento_models import Agendamento
 from .agendamento_serializers import (
@@ -23,6 +24,7 @@ from .agendamento_serializers import (
     AgendamentoCalendarioSerializer
 )
 from clientes.models import Cliente, Veiculo
+from .models import Agendamento, Base, TipoLavagem, TransporteEquipamento
 
 
 # Views Django tradicionais
@@ -86,48 +88,85 @@ def agendamentos_dashboard(request):
     
     return render(request, "lavagens/agendamentos_dashboard.html", context)
 
-
 def novo_agendamento(request):
-    if request.method == "POST":
+    """
+    View para criar um novo agendamento.
+    """
+    # --- Lógica para quando o formulário é ENVIADO (método POST) ---
+    if request.method == 'POST':
         try:
-            data = {
-                "cliente_id": request.POST.get("cliente"),
-                "veiculo_id": request.POST.get("veiculo") or None,
-                "placa_veiculo": request.POST.get("placa_veiculo"),
-                "base": request.POST.get("base"),
-                "local": request.POST.get("local"),
-                "tipo_lavagem": request.POST.get("tipo_lavagem"),
-                "transporte_equipamento": request.POST.get("transporte_equipamento"),
-                "lavador_id": request.POST.get("lavador") or None,
-                "data_agendamento": request.POST.get("data_agendamento"),
-                "hora_agendamento": request.POST.get("hora_agendamento"),
-                "duracao_estimada": request.POST.get("duracao_estimada", 30),
-                "prioridade": request.POST.get("prioridade", "NORMAL"),
-                "telefone_contato": request.POST.get("telefone_contato"),
-                "email_contato": request.POST.get("email_contato"),
-                "observacoes": request.POST.get("observacoes", ""),
-            }
+            # 1. Capturar dados do formulário
+            cliente_id = request.POST.get('cliente')
+            placa_veiculo = request.POST.get('placa_veiculo')
+            data_agendamento_str = request.POST.get('data_agendamento')
+            hora_agendamento_str = request.POST.get('hora_agendamento')
+            base_id = request.POST.get('base')
+            local = request.POST.get('local')
+            tipo_lavagem_id = request.POST.get('tipo_lavagem')
+            transporte_id = request.POST.get('transporte_equipamento')
+            valor_estimado_str = request.POST.get('valor_estimado')
+
+            # 2. Validação básica
+            campos_obrigatorios = [cliente_id, placa_veiculo, data_agendamento_str, hora_agendamento_str, base_id, local, tipo_lavagem_id, transporte_id]
+            if not all(campos_obrigatorios):
+                messages.error(request, 'Erro: Todos os campos com * são obrigatórios.')
+                return redirect('novo_agendamento')
+
+            # 3. Converter dados para os tipos corretos
+            data_agendamento_obj = datetime.strptime(data_agendamento_str, '%Y-%m-%d').date()
+            hora_agendamento_obj = datetime.strptime(hora_agendamento_str, '%H:%M').time()
+            valor_estimado_obj = Decimal(valor_estimado_str) if valor_estimado_str else None
+
+            # 4. Buscar objetos relacionados no banco de dados
+            cliente = get_object_or_404(Cliente, id=cliente_id)
+            base = get_object_or_404(Base, id=base_id)
+            tipo_lavagem = get_object_or_404(TipoLavagem, id=tipo_lavagem_id)
+            transporte_equipamento = get_object_or_404(TransporteEquipamento, id=transporte_id)
+            lavador = get_object_or_404(Lavador, id=request.POST.get('lavador')) if request.POST.get('lavador') else None
+
+            # 5. Criar o objeto Agendamento com os campos corretos
+            Agendamento.objects.create(
+                cliente=cliente,
+                placa_veiculo=placa_veiculo.upper(),
+                # --- CORREÇÃO APLICADA AQUI ---
+                data_agendamento=data_agendamento_obj,
+                hora_agendamento=hora_agendamento_obj,
+                # -----------------------------
+                base=base,
+                local=local,
+                tipo_lavagem=tipo_lavagem,
+                transporte_equipamento=transporte_equipamento,
+                duracao_estimada=int(request.POST.get('duracao_estimada', 30)),
+                lavador=lavador,
+                prioridade=request.POST.get('prioridade', 'NORMAL'),
+                telefone_contato=request.POST.get('telefone_contato', ''),
+                email_contato=request.POST.get('email_contato', ''),
+                observacoes=request.POST.get('observacoes', ''),
+                status='AGENDADO',
+                valor_estimado=valor_estimado_obj,
+            )
             
-            agendamento = Agendamento(**data)
-            agendamento.full_clean()
-            agendamento.save()
-            
-            messages.success(request, f"Agendamento {agendamento.codigo} criado com sucesso!")
-            return redirect("agendamentos_dashboard")
-            
+            messages.success(request, 'Agendamento criado com sucesso!')
+            return redirect('agendamentos_dashboard')
+
         except Exception as e:
-            messages.error(request, f"Erro ao criar agendamento: {str(e)}")
-    
-    context = {
-        "lavadores": Lavador.objects.filter(ativo=True),
-        "clientes": Cliente.objects.filter(ativo=True)[:100],
-        "data_hoje": timezone.now().date().isoformat(),
-        "hora_atual": timezone.now().time().strftime("%H:%M")
-    }
-    
-    return render(request, "lavagens/novo_agendamento.html", context)
+            messages.error(request, f"Ocorreu um erro ao salvar: {e}")
+            return redirect('novo_agendamento')
 
-
+    # --- Lógica para quando a página é CARREGADA (método GET) ---
+    else:
+        # --- CORREÇÃO DE SINTAXE APLICADA AQUI ---
+        context = {
+            'clientes': Cliente.objects.filter(ativo=True),
+            'bases': Base.objects.all(),
+            'tipos_lavagem': TipoLavagem.objects.all(),
+            'transportes_equipamentos': TransporteEquipamento.objects.all(),
+            'lavadores': Lavador.objects.filter(ativo=True),
+            'data_hoje': timezone.now().strftime('%Y-%m-%d'),
+        }
+        return render(request, 'lavagens/novo_agendamento.html', context)
+    
+    
 def detalhes_agendamento(request, agendamento_id):
     agendamento = get_object_or_404(Agendamento, id=agendamento_id)
     

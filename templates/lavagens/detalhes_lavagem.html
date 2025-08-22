@@ -54,7 +54,7 @@
                             <div class="mb-3">
                                 <label class="form-label-custom">Tipo de Lavagem:</label>
                                 <div class="p-2 bg-dark rounded">
-                                    {{ lavagem.tipo_lavagem.get_nome_display }}
+                                    {{ lavagem.tipo_lavagem.nome }}
                                 </div>
                             </div>
                         </div>
@@ -76,7 +76,7 @@
                             <div class="mb-3">
                                 <label class="form-label-custom">Local:</label>
                                 <div class="p-2 bg-dark rounded">
-                                    {{ lavagem.local.get_nome_display }}
+                                    {{ lavagem.local }}
                                 </div>
                             </div>
 
@@ -90,7 +90,7 @@
                             <div class="mb-3">
                                 <label class="form-label-custom">Transporte/Equipamento:</label>
                                 <div class="p-2 bg-dark rounded">
-                                    {{ lavagem.transporte_equipamento.get_nome_display }}
+                                    {{ lavagem.transporte_equipamento.nome }}
                                 </div>
                             </div>
                         </div>
@@ -292,35 +292,6 @@
                                 {{ lavagem.get_status_display }}
                             </span>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Integração Protheus -->
-            <div class="card-custom">
-                <div class="card-header-custom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-sync me-2"></i>
-                        Integração Protheus
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="text-center">
-                        {% if lavagem.protheus_enviado %}
-                            <div class="text-success mb-3">
-                                <i class="fas fa-check-circle fa-2x"></i>
-                                <h6 class="mt-2">Enviado com Sucesso</h6>
-                                {% if lavagem.protheus_numero_os %}
-                                    <small class="text-muted">OS: {{ lavagem.protheus_numero_os }}</small>
-                                {% endif %}
-                            </div>
-                        {% else %}
-                            <div class="text-warning mb-3">
-                                <i class="fas fa-clock fa-2x"></i>
-                                <h6 class="mt-2">Aguardando Envio</h6>
-                                <small class="text-muted">Será enviado automaticamente</small>
-                            </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -5,11 +5,12 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
-from .models import Lavagem, TipoLavagem, Base, TransporteEquipamento
+from .models import Lavagem, TipoLavagem, Base, TransporteEquipamento, Agendamento
 from clientes.models import Cliente, Veiculo, Lavador
 from .forms import BaseForm, TipoLavagemForm, TransporteEquipamentoForm
 import json
-
+from decimal import Decimal
+from datetime import datetime
 
 def dashboard(request):
     search_query = request.GET.get("search", "")
@@ -57,25 +58,34 @@ def dashboard(request):
 def nova_lavagem(request):
     if request.method == "POST":
         try:
+            # --- CAPTURANDO DADOS COM OS NOMES CORRETOS DO HTML ---
             placa_veiculo = request.POST.get("placa_veiculo")
             base_id = request.POST.get("base")
-            local = request.POST.get("local")
-            tipo_lavagem_id = request.POST.get("tipo_lavagem")
-            transporte_equipamento_id = request.POST.get("transporte_equipamento")
+            local = request.POST.get("local") # <-- CORRIGIDO: Agora busca "local"
+            tipo_lavagem_id = request.POST.get("tipo_lavagem") # <-- CORRIGIDO: Agora busca "tipo_lavagem"
+            transporte_id = request.POST.get("transporte_equipamento") # <-- CORRIGIDO: Agora busca "transporte_equipamento"
             lavador_id = request.POST.get("lavador")
-            hora_inicio = request.POST.get("hora_inicio")
+            hora_inicio_str = request.POST.get("hora_inicio")
             observacoes = request.POST.get("observacoes", "")
             contrato = request.POST.get("contrato", "")
-            
-            if not all([placa_veiculo, base_id, local, tipo_lavagem_id, transporte_equipamento_id]):
-                messages.error(request, "Todos os campos obrigatórios devem ser preenchidos.")
+            valor_servico_str = request.POST.get("valor_servico")
+
+            # --- VALIDAÇÃO (agora usando os nomes corretos) ---
+            if not all([placa_veiculo, base_id, local, tipo_lavagem_id, transporte_id, hora_inicio_str]):
+                messages.error(request, "Todos os campos com * devem ser preenchidos.")
                 return redirect("nova_lavagem")
+
+            # --- CONVERSÃO E BUSCA DE OBJETOS ---
+            hora_inicio_obj = datetime.strptime(hora_inicio_str, '%Y-%m-%dT%H:%M')
+            data_lavagem_obj = hora_inicio_obj.date()
+            valor_servico = Decimal(valor_servico_str) if valor_servico_str else Decimal('0.00')
             
             base = get_object_or_404(Base, id=base_id)
-            tipo_lavagem = get_object_or_404(TipoLavagem, id=tipo_lavagem_id)
-            transporte_equipamento = get_object_or_404(TransporteEquipamento, id=transporte_equipamento_id)
+            tipo_lavagem = get_object_or_404(TipoLavagem, id=tipo_lavagem_id) # Usará o ID correto
+            transporte_equipamento = get_object_or_404(TransporteEquipamento, id=transporte_id) # Usará o ID correto
             lavador = get_object_or_404(Lavador, id=lavador_id) if lavador_id else None
-            
+
+            # --- CRIAÇÃO DO OBJETO LAVAGEM ---
             lavagem = Lavagem.objects.create(
                 placa_veiculo=placa_veiculo.upper(),
                 base=base,
@@ -83,10 +93,12 @@ def nova_lavagem(request):
                 tipo_lavagem=tipo_lavagem,
                 transporte_equipamento=transporte_equipamento,
                 lavador=lavador,
-                hora_inicio=timezone.now() if not hora_inicio else hora_inicio,
+                hora_inicio=hora_inicio_obj,
+                hora_termino=None,
+                data_lavagem=data_lavagem_obj,
                 observacoes=observacoes,
                 contrato=contrato,
-                valor_servico=0 # Valor padrão, já que não há mais preco_base e multiplicador_preco
+                valor_servico=valor_servico,
             )
             
             messages.success(request, f"Lavagem {lavagem.codigo} criada com sucesso!")
@@ -121,13 +133,13 @@ def concluir_lavagem(request, lavagem_id):
         lavagem = get_object_or_404(Lavagem, id=lavagem_id)
         
         if lavagem.status == "EM_ANDAMENTO":
-            lavagem.concluir_lavagem()
+            # A lógica agora está no método do modelo, que já chamamos
+            lavagem.concluir_lavagem() 
             messages.success(request, f"Lavagem {lavagem.codigo} concluída com sucesso!")
         else:
             messages.warning(request, "Esta lavagem já foi concluída ou cancelada.")
     
     return redirect("dashboard")
-
 
 def cancelar_lavagem(request, lavagem_id):
     if request.method == "POST":
@@ -141,7 +153,6 @@ def cancelar_lavagem(request, lavagem_id):
             messages.warning(request, "Esta lavagem já foi concluída ou cancelada.")
     
     return redirect("dashboard")
-
 
 @csrf_exempt
 def api_locais_por_base(request):

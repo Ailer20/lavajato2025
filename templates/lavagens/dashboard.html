@@ -118,13 +118,13 @@
                                         </span>
                                     </td>
                                     <td>{{ lavagem.hora_inicio|date:"d/m/Y H:i" }}</td>
-                                    <td>{{ lavagem.tipo_lavagem.get_nome_display }}</td>
+                                    <td>{{ lavagem.tipo_lavagem.nome }}</td>
                                     <td>{{ lavagem.base.nome }}</td>
-                                    <td>{{ lavagem.local.get_nome_display }}</td>
+                                    <td>{{ lavagem.local }}</td>
                                     <td>
                                         <strong>{{ lavagem.placa_veiculo }}</strong>
                                     </td>
-                                    <td>{{ lavagem.transporte_equipamento.get_nome_display }}</td>
+                                    <td>{{ lavagem.transporte_equipamento.nome }}</td>
                                     <td>
                                         {% if lavagem.hora_termino %}
                                             {{ lavagem.hora_termino|date:"d/m/Y H:i" }}
@@ -240,13 +240,13 @@
                                         </span>
                                     </td>
                                     <td>{{ lavagem.hora_inicio|date:"d/m/Y H:i" }}</td>
-                                    <td>{{ lavagem.tipo_lavagem.get_nome_display }}</td>
+                                    <td>{{ lavagem.tipo_lavagem.nome }}</td>
                                     <td>{{ lavagem.base.nome }}</td>
-                                    <td>{{ lavagem.local.get_nome_display }}</td>
+                                    <td>{{ lavagem.local }}</td> 
                                     <td>
                                         <strong>{{ lavagem.placa_veiculo }}</strong>
                                     </td>
-                                    <td>{{ lavagem.transporte_equipamento.get_nome_display }}</td>
+                                    <td>{{ lavagem.transporte_equipamento.nome }}</td>
                                     <td>
                                         {% if lavagem.hora_termino %}
                                             {{ lavagem.hora_termino|date:"d/m/Y H:i" }}

@@ -1,0 +1,126 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Calendário de Agendamentos - Lava Jato 2025{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <!-- Adicionando os arquivos do FullCalendar -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <style>
+        /* Estilos para o calendário */
+        #calendario {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 10px;
+            color: #e0e0e0; /* Cor do texto geral */
+        }
+        /* Customizando as cores do FullCalendar para o seu tema escuro */
+        :root {
+            --fc-border-color: #4b5563;
+            --fc-daygrid-day-bg-color: #1f2937;
+            --fc-list-even-row-bg-color: #374151;
+            --fc-list-odd-row-bg-color: #1f2937;
+        }
+        .fc-day-today {
+            background: rgba(59, 130, 246, 0.1 ) !important;
+        }
+        .fc-event {
+            cursor: pointer;
+        }
+        .fc-event-title {
+            font-weight: 600;
+        }
+        .fc-toolbar-title {
+            color: #f3f4f6;
+        }
+        .fc .fc-button-primary {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .fc .fc-button-primary:hover {
+            background-color: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div class="search-container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2 class="mb-3">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Calendário de Agendamentos
+                </h2>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'novo_agendamento' %}" class="btn btn-success-custom btn-lg">
+                    <i class="fas fa-plus me-2"></i>
+                    Novo Agendamento
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- O contêiner onde o calendário será renderizado -->
+    <div id='calendario'></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarioEl = document.getElementById('calendario');
+    
+    const calendar = new FullCalendar.Calendar(calendarioEl, {
+        initialView: 'dayGridMonth', // Visão inicial (mês)
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+        },
+        locale: 'pt-br', // Traduzir para português
+        buttonText: {
+            today: 'Hoje',
+            month: 'Mês',
+            week: 'Semana',
+            day: 'Dia',
+            list: 'Lista'
+        },
+        events: [
+            // O Django vai gerar os eventos aqui
+            {% for agendamento in agendamentos %}
+            {
+                id: '{{ agendamento.id }}',
+                title: '{{ agendamento.placa_veiculo }} - {{ agendamento.cliente.nome|truncatechars:15 }}',
+                start: '{{ agendamento.data_hora_agendamento|date:"c" }}', // Formato ISO 8601
+                end: '{{ agendamento.get_horario_fim_estimado|date:"c" }}',
+                // Adicionando cores baseadas no status
+                {% if agendamento.status == 'CONFIRMADO' %}
+                    color: '#10b981', // Verde
+                {% elif agendamento.status == 'AGENDADO' %}
+                    color: '#3b82f6', // Azul
+                {% elif agendamento.status == 'CANCELADO' %}
+                    color: '#6b7280', // Cinza
+                    display: 'background',
+                {% endif %}
+                url: '{% url "detalhes_agendamento" agendamento.id %}' // Link para os detalhes
+            },
+            {% endfor %}
+        ],
+        eventClick: function(info) {
+            // Impede o comportamento padrão do link para abrir na mesma página
+            info.jsEvent.preventDefault(); 
+            if (info.event.url) {
+                window.location.href = info.event.url;
+            }
+        }
+    });
+    
+    calendar.render();
+});
+</script>
+{% endblock %}

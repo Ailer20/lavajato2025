@@ -46,10 +46,11 @@
                         <div class="mb-3">
                             <label class="form-label-custom">TIPO DE LAVAGEM *</label>
                             <select class="form-control form-control-custom" name="tipo_lavagem" required>
-                                <option value="">Selecione o tipo de lavagem</option>
+                                <option value="" disabled selected>Selecione o tipo de lavagem</option>
                                 {% for tipo in tipos_lavagem %}
                                     <option value="{{ tipo.id }}" data-preco="{{ tipo.preco_base }}">
-                                        {{ tipo.get_nome_display }} - R$ {{ tipo.preco_base }}
+                                        <!-- CORREÇÃO AQUI -->
+                                        {{ tipo.nome }} - R$ {{ tipo.preco_base }}
                                     </option>
                                 {% endfor %}
                             </select>
@@ -105,10 +106,11 @@
                         <div class="mb-3">
                             <label class="form-label-custom">TRANSPORTES/EQUIPAMENTOS *</label>
                             <select class="form-control form-control-custom" name="transporte_equipamento" required>
-                                <option value="">Selecione o tipo de transporte/equipamento</option>
+                                <option value="" disabled selected>Selecione o tipo de transporte/equipamento</option>
                                 {% for transporte in transportes_equipamentos %}
                                     <option value="{{ transporte.id }}" data-multiplicador="{{ transporte.multiplicador_preco }}">
-                                        {{ transporte.get_nome_display }}
+                                        <!-- CORREÇÃO AQUI -->
+                                        {{ transporte.nome }}
                                         {% if transporte.multiplicador_preco != 1.0 %}
                                             (x{{ transporte.multiplicador_preco }})
                                         {% endif %}
@@ -180,6 +182,7 @@
                                 <div id="valor_estimado">
                                     <span class="text-muted">Selecione o tipo de lavagem e equipamento para calcular</span>
                                 </div>
+                                <input type="hidden" name="valor_servico" id="valor_servico_hidden">
                             </div>
                         </div>
 
@@ -247,6 +250,11 @@ $(document).ready(function() {
             $('#local_hidden').val($(this).data('value'));
         }
     });
+    
+    const primeiroLocalAtivo = $('.local-btn:not(:disabled)').first();
+    if (primeiroLocalAtivo.length > 0 && !$('#local_hidden').val()) {
+        primeiroLocalAtivo.click(); // Simula um clique para ativar e preencher o hidden input
+    }
 
     // Buscar informações do veículo pela placa
     let searchTimeout;
@@ -289,13 +297,22 @@ $(document).ready(function() {
             $("#valor_estimado").html(`
                 <div class="row">
                     <div class="col-12">
-                        <small class="text-muted">${tipoLavagem.text().split(' - ')[0]} x ${transporte.text().split('(')[0]}</small><br>
+                        <small class="text-muted">${tipoLavagem.text().split(' - ')[0]} x ${transporte.text().split('(')[0]}</small>  
+
                         <strong>R$ ${valorFinal.toFixed(2)}</strong>
                     </div>
                 </div>
             `);
+
+            // --- ADICIONE ESTA LINHA ---
+            // Preenche o campo escondido com o valor calculado
+            $('#valor_servico_hidden').val(valorFinal.toFixed(2));
+            
         } else {
             $('#valor_estimado').html('<span class="text-muted">Selecione o tipo de lavagem e equipamento para calcular</span>');
+            
+            // --- ADICIONE ESTA LINHA (para limpar o valor se a seleção for desfeita) ---
+            $('#valor_servico_hidden').val('');
         }
     }
 

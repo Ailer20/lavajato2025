@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from clientes.models import Cliente, Veiculo, Lavador
 from clientes.models import Lavador
 from decimal import Decimal
-
+from datetime import datetime
 
 class Agendamento(models.Model):
     """
@@ -41,10 +41,22 @@ class Agendamento(models.Model):
         blank=True,
         help_text="Veículo a ser lavado (opcional se apenas placa)"
     )
-    base = models.CharField("Base", max_length=100, blank=True)
+    base = models.ForeignKey(
+        'lavagens.Base', 
+        on_delete=models.PROTECT, 
+        related_name="agendamentos" # Nome da relação pode ser simples
+    )
     local = models.CharField("Local", max_length=100, blank=True)
-    tipo_lavagem = models.CharField("Tipo de Lavagem", max_length=50, blank=True)
-    transporte_equipamento = models.CharField("Transporte/Equipamento", max_length=50, blank=True)
+    tipo_lavagem = models.ForeignKey(
+        'lavagens.TipoLavagem', 
+        on_delete=models.PROTECT, 
+        related_name="agendamentos"
+    )
+    transporte_equipamento = models.ForeignKey(
+        'lavagens.TransporteEquipamento', 
+        on_delete=models.PROTECT, 
+        related_name="agendamentos"
+    )
     lavador = models.ForeignKey(
         Lavador, 
         on_delete=models.PROTECT, 
@@ -132,10 +144,6 @@ class Agendamento(models.Model):
             import random
             import string
             self.codigo = "AGD" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
-        
-        # Definir valor estimado e duração estimada como valores fixos ou remover a lógica
-        if not self.valor_estimado:
-            self.valor_estimado = Decimal("25.00") # Valor fixo
         if not self.duracao_estimada:
             self.duracao_estimada = 30 # Duração fixa
         
@@ -155,7 +163,14 @@ class Agendamento(models.Model):
     @property
     def data_hora_agendamento(self):
         if self.data_agendamento and self.hora_agendamento:
-            return timezone.datetime.combine(self.data_agendamento, self.hora_agendamento)
+            # --- CORREÇÃO AQUI ---
+            # 1. Combine a data e a hora para criar um datetime "naive"
+            naive_datetime = datetime.combine(self.data_agendamento, self.hora_agendamento)
+            
+            # 2. Use a função do Django para tornar o datetime "aware"
+            # Ele usará o fuso horário definido em seu settings.py (TIME_ZONE)
+            return timezone.make_aware(naive_datetime)
+        
         return None
 
     @property
