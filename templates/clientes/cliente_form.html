@@ -4,8 +4,10 @@
 
 {% block extra_css %}
     <!-- Carregando os arquivos CSS. Isso está correto! -->
-    <link rel="stylesheet" href="{% static 'css/custom_form_theme.css' %}">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">       <!-- 1. Cérebro (Variáveis ) -->
+    <link rel="stylesheet" href="{% static 'css/components.css' %}"> <!-- 2. Componentes -->
+    <link rel="stylesheet" href="{% static 'css/pages.css' %}">      <!-- 3. Páginas Específicas -->
+    
 {% endblock %}
 
 {% block content %}

@@ -5,6 +5,9 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}"> <!-- 2. Componentes -->
+    <link rel="stylesheet" href="{% static 'css/pages.css' %}">      <!-- 3. Páginas Específicas -->
+    
 {% endblock %}
 
 {% block content %}
@@ -94,7 +97,7 @@
         <div class="card-body p-0">
             {% if lavagens_andamento %}
                 <div class="table-responsive">
-                    <table class="table table-custom mb-0">
+                    <table class="table table-custom">
                         <thead>
                             <tr>
                                 <th>ID</th>

@@ -1,0 +1,86 @@
+/* ==========================================================================
+   ARQUIVO DE ESTILOS DE PÁGINAS ESPECÍFICAS
+   ========================================================================== */
+
+/* --- Estilos Gerais para Títulos e Textos --- */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-light);
+}
+
+/* ==========================================================================
+   DASHBOARD DE AGENDAMENTOS
+   ========================================================================== */
+
+/* --- Cards de Estatísticas --- */
+.stats-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    text-align: center;
+}
+.stats-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+.stats-card .text-muted {
+    color: var(--text-muted) !important;
+}
+
+/* --- Card de Filtros --- */
+.filter-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+.filter-card .form-label {
+    color: var(--text-light); /* CORREÇÃO: Garante que os rótulos usem a cor do tema */
+}
+
+/* --- Container da Tabela de Agendamentos --- */
+.table-agendamentos {
+    background-color: var(--card-bg);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    padding: 0;
+    border: 1px solid var(--border-color);
+}
+
+.table-agendamentos .table {
+    margin-bottom: 0;
+}
+
+/* --- Mensagem de "Nenhum resultado" --- */
+.no-results-message {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-muted); /* CORREÇÃO: Usa a cor de texto secundária */
+    background-color: var(--card-bg);
+}
+
+/* --- Botões de Ação na Tabela --- */
+.btn-action {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    margin: 0.125rem;
+    border: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    color: var(--text-white);
+}
+.btn-confirmar { background-color: var(--success-color); }
+.btn-cancelar { background-color: var(--danger-color); }
+.btn-iniciar { background-color: var(--warning-color); }
+
+/* --- Linha Vencida na Tabela --- */
+.vencido {
+    background-color: rgba(239, 68, 68, 0.1) !important; 
+    border-left: 4px solid var(--danger-color);
+}
+.vencido td {
+    background-color: inherit !important; 
+}

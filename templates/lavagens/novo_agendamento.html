@@ -3,19 +3,14 @@
 
 {% block title %}Novo Agendamento - Lava Jato 2025{% endblock %}
 
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/novo_agendamento.css' %}">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-
-{% endblock %}
-
 {% block content %}
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <!-- Header -->
             <div class="mb-4">
-                <h1 class="text-white mb-1">
+                {# REMOVIDA a classe 'text-white' para que o título siga o tema #}
+                <h1 class="mb-1">
                     <i class="fas fa-calendar-plus me-3"></i>
                     Novo Agendamento
                 </h1>
@@ -23,15 +18,17 @@
             </div>
 
             <!-- Formulário -->
-            <div class="form-container">
+            {# REMOVIDA a classe 'form-container' que não é mais necessária #}
+            <div class="card-custom">
                 <form method="POST" id="agendamentoForm">
                     {% csrf_token %}
                     
                     <div class="row">
                         <!-- Cliente -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label-custom">CLIENTE *</label>
-                            <select class="form-control form-control-custom" name="cliente" id="cliente_select" required>
+                            {# TROCADAS as classes personalizadas pela padrão 'form-label' #}
+                            <label class="form-label">CLIENTE *</label>
+                            <select class="form-select" name="cliente" id="cliente_select" required>
                                 <option value="">Selecione o cliente</option>
                                 {% for cliente in clientes %}
                                     <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
@@ -41,9 +38,9 @@
 
                         <!-- Placa Veículo -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label-custom">PLACA VEÍCULO *</label>
+                            <label class="form-label">PLACA VEÍCULO *</label>
                             <input type="text" 
-                                   class="form-control form-control-custom" 
+                                   class="form-control" 
                                    name="placa_veiculo"
                                    id="placa_veiculo"
                                    placeholder="Digite a placa do veículo"
@@ -55,9 +52,9 @@
                     <div class="row">
                         <!-- Data do Agendamento -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label-custom">DATA DO AGENDAMENTO *</label>
+                            <label class="form-label">DATA DO AGENDAMENTO *</label>
                             <input type="date" 
-                                   class="form-control form-control-custom" 
+                                   class="form-control" 
                                    name="data_agendamento"
                                    id="data_agendamento"
                                    min="{{ data_hoje }}"
@@ -66,9 +63,9 @@
 
                         <!-- Hora do Agendamento -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label-custom">HORA DO AGENDAMENTO *</label>
+                            <label class="form-label">HORA DO AGENDAMENTO *</label>
                             <input type="time" 
-                                   class="form-control form-control-custom" 
+                                   class="form-control" 
                                    name="hora_agendamento"
                                    id="hora_agendamento"
                                    min="06:00"
@@ -80,8 +77,8 @@
 
                     <!-- Base -->
                     <div class="mb-3">
-                        <label class="form-label-custom">BASE *</label>
-                        <select class="form-control form-control-custom" name="base" id="base_select" required>
+                        <label class="form-label">BASE *</label>
+                        <select class="form-select" name="base" id="base_select" required>
                             <option value="">Selecione a base</option>
                             {% for base in bases %}
                                 <option value="{{ base.id }}">{{ base.nome }}</option>
@@ -91,47 +88,39 @@
 
                     <!-- Local -->
                     <div class="mb-3">
-                        <label class="form-label-custom">LOCAL *</label>
+                        <label class="form-label">LOCAL *</label>
                         <div class="btn-group w-100" role="group" id="local_buttons">
                             <input type="hidden" name="local" id="local_hidden">
-                            <button type="button" class="btn local-btn" data-value="1" disabled>
-                                DICK 1
-                            </button>
-                            <button type="button" class="btn local-btn" data-value="2" disabled>
-                                DICK 2
-                            </button>
-                            <button type="button" class="btn local-btn" data-value="3" disabled>
-                                BASES
-                            </button>
+                            <button type="button" class="btn local-btn" data-value="1" disabled>DICK 1</button>
+                            <button type="button" class="btn local-btn" data-value="2" disabled>DICK 2</button>
+                            <button type="button" class="btn local-btn" data-value="3" disabled>BASES</button>
                         </div>
-                        <div id="disponibilidade_status" style="display: none;"></div>
+                        <div id="disponibilidade_status" class="mt-2" style="display: none;"></div>
                     </div>
 
                     <div class="row">
                         <!-- Tipo de Lavagem -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label-custom">TIPO DE LAVAGEM *</label>
-                            <select class="form-control form-control-custom" name="tipo_lavagem" id="tipo_lavagem" required>
+                            <label class="form-label">TIPO DE LAVAGEM *</label>
+                            <select class="form-select" name="tipo_lavagem" id="tipo_lavagem" required>
                                 <option value="">Selecione o tipo de lavagem</option>
-                                    {% for tipo in tipos_lavagem %}
-                                        <option value="{{ tipo.id }}" data-preco="{{ tipo.preco_base }}">
-                                            {{ tipo.nome }} - R$ {{ tipo.preco_base|floatformat:2 }} <!-- Use .nome aqui -->
-                                        </option>
-                                    {% endfor %}
+                                {% for tipo in tipos_lavagem %}
+                                    <option value="{{ tipo.id }}" data-preco="{{ tipo.preco_base }}">
+                                        {{ tipo.nome }} - R$ {{ tipo.preco_base|floatformat:2 }}
+                                    </option>
+                                {% endfor %}
                             </select>
                         </div>
 
                         <!-- Transportes/Equipamentos -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label-custom">TRANSPORTES/EQUIPAMENTOS *</label>
-                            <select class="form-control form-control-custom" name="transporte_equipamento" id="transporte_equipamento" required>
-                                <option value="">Selecione o tipo de transporte/equipamento</option>
+                            <label class="form-label">TRANSPORTES/EQUIPAMENTOS *</label>
+                            <select class="form-select" name="transporte_equipamento" id="transporte_equipamento" required>
+                                <option value="">Selecione o tipo</option>
                                 {% for transporte in transportes_equipamentos %}
                                     <option value="{{ transporte.id }}" data-multiplicador="{{ transporte.multiplicador_preco }}">
                                         {{ transporte.nome }}
-                                        {% if transporte.multiplicador_preco != 1.0 %}
-                                            (x{{ transporte.multiplicador_preco }})
-                                        {% endif %}
+                                        {% if transporte.multiplicador_preco != 1.0 %}(x{{ transporte.multiplicador_preco }}){% endif %}
                                     </option>
                                 {% endfor %}
                             </select>
@@ -141,20 +130,14 @@
                     <div class="row">
                         <!-- Duração Estimada -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label-custom">DURAÇÃO ESTIMADA (MINUTOS)</label>
-                            <input type="number" 
-                                   class="form-control form-control-custom" 
-                                   name="duracao_estimada"
-                                   id="duracao_estimada"
-                                   min="15"
-                                   max="240"
-                                   value="30">
+                            <label class="form-label">DURAÇÃO ESTIMADA (MINUTOS)</label>
+                            <input type="number" class="form-control" name="duracao_estimada" id="duracao_estimada" min="15" max="240" value="30">
                         </div>
 
                         <!-- Lavador -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label-custom">LAVADOR</label>
-                            <select class="form-control form-control-custom" name="lavador">
+                            <label class="form-label">LAVADOR</label>
+                            <select class="form-select" name="lavador">
                                 <option value="">Selecione o lavador (opcional)</option>
                                 {% for lavador in lavadores %}
                                     <option value="{{ lavador.id }}">{{ lavador.nome }}</option>
@@ -165,51 +148,34 @@
 
                     <!-- Prioridade -->
                     <div class="mb-3">
-                        <label class="form-label-custom">PRIORIDADE</label>
+                        <label class="form-label">PRIORIDADE</label>
                         <div class="d-flex flex-wrap">
                             <input type="hidden" name="prioridade" id="prioridade_hidden" value="NORMAL">
-                            <button type="button" class="prioridade-btn prioridade-baixa" data-value="BAIXA">
-                                <i class="fas fa-arrow-down me-1"></i> Baixa
-                            </button>
-                            <button type="button" class="prioridade-btn prioridade-normal active" data-value="NORMAL">
-                                <i class="fas fa-minus me-1"></i> Normal
-                            </button>
-                            <button type="button" class="prioridade-btn prioridade-alta" data-value="ALTA">
-                                <i class="fas fa-arrow-up me-1"></i> Alta
-                            </button>
-                            <button type="button" class="prioridade-btn prioridade-urgente" data-value="URGENTE">
-                                <i class="fas fa-exclamation me-1"></i> Urgente
-                            </button>
+                            <button type="button" class="prioridade-btn prioridade-baixa" data-value="BAIXA"><i class="fas fa-arrow-down me-1"></i> Baixa</button>
+                            <button type="button" class="prioridade-btn prioridade-normal active" data-value="NORMAL"><i class="fas fa-minus me-1"></i> Normal</button>
+                            <button type="button" class="prioridade-btn prioridade-alta" data-value="ALTA"><i class="fas fa-arrow-up me-1"></i> Alta</button>
+                            <button type="button" class="prioridade-btn prioridade-urgente" data-value="URGENTE"><i class="fas fa-exclamation me-1"></i> Urgente</button>
                         </div>
                     </div>
 
                     <div class="row">
                         <!-- Telefone de Contato -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label-custom">TELEFONE DE CONTATO</label>
-                            <input type="tel" 
-                                   class="form-control form-control-custom" 
-                                   name="telefone_contato"
-                                   placeholder="(11) 99999-9999">
+                            <label class="form-label">TELEFONE DE CONTATO</label>
+                            <input type="tel" class="form-control" name="telefone_contato" placeholder="(11) 99999-9999">
                         </div>
 
                         <!-- Email de Contato -->
                         <div class="col-md-6 mb-3">
-                            <label class="form-label-custom">EMAIL DE CONTATO</label>
-                            <input type="email" 
-                                   class="form-control form-control-custom" 
-                                   name="email_contato"
-                                   placeholder="cliente@email.com">
+                            <label class="form-label">EMAIL DE CONTATO</label>
+                            <input type="email" class="form-control" name="email_contato" placeholder="cliente@email.com">
                         </div>
                     </div>
 
                     <!-- Observações -->
                     <div class="mb-4">
-                        <label class="form-label-custom">OBSERVAÇÕES</label>
-                        <textarea class="form-control form-control-custom" 
-                                  name="observacoes" 
-                                  rows="3" 
-                                  placeholder="Observações sobre o agendamento..."></textarea>
+                        <label class="form-label">OBSERVAÇÕES</label>
+                        <textarea class="form-control" name="observacoes" rows="3" placeholder="Observações sobre o agendamento..."></textarea>
                     </div>
 
                     <!-- Valor estimado -->
@@ -219,7 +185,6 @@
                             <div id="valor_estimado">
                                 <span class="text-muted">Selecione o tipo de lavagem e equipamento para calcular</span>
                             </div>
-                            <!-- PASSO 1: ADICIONE ESTE CAMPO ESCONDIDO -->
                             <input type="hidden" name="valor_estimado" id="valor_estimado_hidden">
                         </div>
                     </div>
@@ -245,6 +210,7 @@
     </div>
 </div>
 {% endblock %}
+
 
 {% block extra_js %}
 <script>
