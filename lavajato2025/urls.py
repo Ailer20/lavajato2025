@@ -25,6 +25,7 @@ urlpatterns = [
     path("api/", include("lavagens.api_urls")),
     path('', include('lavagens.agendamento_urls')),
     path("", include("clientes.urls")),
+    path('contas/', include('usuarios.urls')),
 ]
 
 # Servir arquivos estáticos e media em desenvolvimento

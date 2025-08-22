@@ -11,7 +11,10 @@ from .forms import BaseForm, TipoLavagemForm, TransporteEquipamentoForm
 import json
 from decimal import Decimal
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
 
+
+@login_required
 def dashboard(request):
     search_query = request.GET.get("search", "")
     status_filter = request.GET.get("status", "")
@@ -54,7 +57,7 @@ def dashboard(request):
     
     return render(request, "lavagens/dashboard.html", context)
 
-
+@login_required
 def nova_lavagem(request):
     if request.method == "POST":
         try:
@@ -117,7 +120,7 @@ def nova_lavagem(request):
     
     return render(request, "lavagens/nova_lavagem.html", context)
 
-
+@login_required
 def detalhes_lavagem(request, lavagem_id):
     lavagem = get_object_or_404(Lavagem, id=lavagem_id)
     
@@ -127,7 +130,7 @@ def detalhes_lavagem(request, lavagem_id):
     
     return render(request, "lavagens/detalhes_lavagem.html", context)
 
-
+@login_required
 def concluir_lavagem(request, lavagem_id):
     if request.method == "POST":
         lavagem = get_object_or_404(Lavagem, id=lavagem_id)
@@ -141,6 +144,7 @@ def concluir_lavagem(request, lavagem_id):
     
     return redirect("dashboard")
 
+@login_required
 def cancelar_lavagem(request, lavagem_id):
     if request.method == "POST":
         lavagem = get_object_or_404(Lavagem, id=lavagem_id)
@@ -154,11 +158,12 @@ def cancelar_lavagem(request, lavagem_id):
     
     return redirect("dashboard")
 
+@login_required
 @csrf_exempt
 def api_locais_por_base(request):
     return JsonResponse({"locais": []})
 
-
+@login_required
 @csrf_exempt
 def api_buscar_veiculo(request):
     if request.method == "GET":
@@ -188,7 +193,7 @@ def api_buscar_veiculo(request):
     return JsonResponse({"found": False})
 
 
-
+@login_required
 def relatorios(request):
     from django.db.models import Count, Sum, Avg
     from decimal import Decimal
@@ -272,12 +277,12 @@ def relatorios(request):
 
 
 
-
-# Views para Base
+@login_required
 def base_list(request):
     bases = Base.objects.all()
     return render(request, 'lavagens/base_list.html', {'bases': bases})
 
+@login_required
 def base_create(request):
     if request.method == 'POST':
         form = BaseForm(request.POST)
@@ -289,6 +294,7 @@ def base_create(request):
         form = BaseForm()
     return render(request, 'lavagens/base_form.html', {'form': form, 'action': 'Adicionar Base'})
 
+@login_required
 def base_update(request, pk):
     base = get_object_or_404(Base, pk=pk)
     if request.method == 'POST':
@@ -301,6 +307,7 @@ def base_update(request, pk):
         form = BaseForm(instance=base)
     return render(request, 'lavagens/base_form.html', {'form': form, 'action': 'Editar Base'})
 
+@login_required
 def base_delete(request, pk):
     base = get_object_or_404(Base, pk=pk)
     if request.method == 'POST':
@@ -309,11 +316,12 @@ def base_delete(request, pk):
         return redirect('base_list')
     return render(request, 'lavagens/base_confirm_delete.html', {'base': base})
 
-# Views para TipoLavagem
+@login_required
 def tipo_lavagem_list(request):
     tipos_lavagem = TipoLavagem.objects.all()
     return render(request, 'lavagens/tipo_lavagem_list.html', {'tipos_lavagem': tipos_lavagem})
 
+@login_required
 def tipo_lavagem_create(request):
     if request.method == 'POST':
         form = TipoLavagemForm(request.POST)
@@ -325,6 +333,7 @@ def tipo_lavagem_create(request):
         form = TipoLavagemForm()
     return render(request, 'lavagens/tipo_lavagem_form.html', {'form': form, 'action': 'Adicionar Tipo de Lavagem'})
 
+@login_required
 def tipo_lavagem_update(request, pk):
     tipo_lavagem = get_object_or_404(TipoLavagem, pk=pk)
     if request.method == 'POST':
@@ -337,6 +346,7 @@ def tipo_lavagem_update(request, pk):
         form = TipoLavagemForm(instance=tipo_lavagem)
     return render(request, 'lavagens/tipo_lavagem_form.html', {'form': form, 'action': 'Editar Tipo de Lavagem'})
 
+@login_required
 def tipo_lavagem_delete(request, pk):
     tipo_lavagem = get_object_or_404(TipoLavagem, pk=pk)
     if request.method == 'POST':
@@ -345,11 +355,12 @@ def tipo_lavagem_delete(request, pk):
         return redirect('tipo_lavagem_list')
     return render(request, 'lavagens/tipo_lavagem_confirm_delete.html', {'tipo_lavagem': tipo_lavagem})
 
-# Views para TransporteEquipamento
+@login_required
 def transporte_equipamento_list(request):
     transportes_equipamentos = TransporteEquipamento.objects.all()
     return render(request, 'lavagens/transporte_equipamento_list.html', {'transportes_equipamentos': transportes_equipamentos})
 
+@login_required
 def transporte_equipamento_create(request):
     if request.method == 'POST':
         form = TransporteEquipamentoForm(request.POST)
@@ -361,6 +372,7 @@ def transporte_equipamento_create(request):
         form = TransporteEquipamentoForm()
     return render(request, 'lavagens/transporte_equipamento_form.html', {'form': form, 'action': 'Adicionar Transporte/Equipamento'})
 
+@login_required
 def transporte_equipamento_update(request, pk):
     transporte_equipamento = get_object_or_404(TransporteEquipamento, pk=pk)
     if request.method == 'POST':
@@ -373,6 +385,7 @@ def transporte_equipamento_update(request, pk):
         form = TransporteEquipamentoForm(instance=transporte_equipamento)
     return render(request, 'lavagens/transporte_equipamento_form.html', {'form': form, 'action': 'Editar Transporte/Equipamento'})
 
+@login_required
 def transporte_equipamento_delete(request, pk):
     transporte_equipamento = get_object_or_404(TransporteEquipamento, pk=pk)
     if request.method == 'POST':

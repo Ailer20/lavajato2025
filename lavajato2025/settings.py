@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     # Local apps
     'lavagens',
     'clientes',
+    'usuarios',
 ]
 
 MIDDLEWARE = [
@@ -166,3 +167,15 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
+# lavajato2025/settings.py
+
+# --- CONFIGURAÇÕES DE E-MAIL PARA RESET DE SENHA ---
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'lavajatonorte3@gmail.com'  # <-- SEU E-MAIL DO GMAIL
+EMAIL_HOST_PASSWORD = 'idyvslrexvkwuzjw' # <-- SUA SENHA DE APP
+DEFAULT_FROM_EMAIL = 'Lava Jato 2025 <nao-responda@lavajato.com>'
