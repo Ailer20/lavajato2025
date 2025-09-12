@@ -378,6 +378,8 @@ def relatorios(request):
         "contrato_dados": json.dumps(contrato_dados),
         "transporte_labels": json.dumps(transporte_labels),
         "transporte_dados": json.dumps(transporte_dados),
+        "ranking_carros_contratos": ranking_carros_contratos,
+
     }
     
     return render(request, "lavagens/relatorios.html", context)

@@ -182,18 +182,18 @@
                     <table class="table table-custom">
                         <thead>
                             <tr>
-                                <th>Rank</th>
-                                <th>qtd de lavagem</th>
-                                <th>placa</th>
+                                <th>RANK</th>
+                                <th>QTD LAVAGENS</th>
+                                <th>PLACA</th>
                                 <th>CONTRATO</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for item in ranking_carros_contratos %}
+{% for item in ranking_carros_contratos %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
-                                <td>{{ item.qtd_lavagem }}</td>
-                                <td>{{ item.placa }}</td>
+                                <td>{{ item.total_lavagens }}</td>
+                                <td>{{ item.placa_veiculo }}</td>
                                 <td>{{ item.contrato }}</td>
                             </tr>
                             {% endfor %}
