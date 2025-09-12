@@ -325,6 +325,24 @@ def relatorios(request):
     materiais_labels = list(consumo_materiais.keys())
     materiais_dados = [float(value) for value in consumo_materiais.values()]
 
+    # --- Lavagens por Contrato ---
+    lavagens_por_contrato = lavagens_periodo.filter(status="CONCLUIDA", contrato__isnull=False)\
+        .values("contrato")\
+        .annotate(total_lavagens=Count("id"))\
+        .order_by("-total_lavagens")
+
+    contrato_labels = [item["contrato"] for item in lavagens_por_contrato]
+    contrato_dados = [item["total_lavagens"] for item in lavagens_por_contrato]
+
+    # --- Lavagens por Transporte/Equipamento ---
+    lavagens_por_transporte = lavagens_periodo.filter(status="CONCLUIDA", transporte_equipamento__isnull=False)\
+        .values("transporte_equipamento__nome")\
+        .annotate(total_lavagens=Count("id"))\
+        .order_by("-total_lavagens")
+
+    transporte_labels = [item["transporte_equipamento__nome"] for item in lavagens_por_transporte]
+    transporte_dados = [item["total_lavagens"] for item in lavagens_por_transporte]
+
     # --- Contexto para o Template ---
     estatisticas = {
         "total_lavagens": total_lavagens,
@@ -356,6 +374,10 @@ def relatorios(request):
         "ranking_dados": json.dumps(ranking_dados),
         "materiais_labels": json.dumps(materiais_labels),
         "materiais_dados": json.dumps(materiais_dados),
+        "contrato_labels": json.dumps(contrato_labels),
+        "contrato_dados": json.dumps(contrato_dados),
+        "transporte_labels": json.dumps(transporte_labels),
+        "transporte_dados": json.dumps(transporte_dados),
     }
     
     return render(request, "lavagens/relatorios.html", context)
