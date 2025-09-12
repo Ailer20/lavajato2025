@@ -539,7 +539,7 @@ new Chart(ctxRanking, {
 // Gráfico de Consumo de Materiais por Mês (Pizza/Doughnut)
 const ctxMateriais = document.getElementById("graficoMateriais").getContext("2d");
 new Chart(ctxMateriais, {
-    type: "doughnut",
+    type: "bar",
     data: {
         labels: {{ materiais_labels|safe }},
         datasets: [{
@@ -547,13 +547,32 @@ new Chart(ctxMateriais, {
             backgroundColor: [
                 "#fd7e14", "#20c997", "#6610f2", "#e83e8c", "#ffc107", "#17a2b8", "#dc3545", "#6c757d"
             ],
-            borderWidth: 2,
-            borderColor: "#2d2d2d"
+            borderWidth: 1
         }]
     },
     options: {
+        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            },
+            y: {
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            }
+        },
         plugins: {
             legend: {
                 position: "bottom",
