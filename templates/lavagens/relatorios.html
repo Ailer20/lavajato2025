@@ -202,6 +202,40 @@
         </div>
     </div>
 
+
+
+    <div class="row mb-4">
+        <!-- Gráfico de Lavagens por Contrato -->
+        <div class="col-md-6">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-contract me-2"></i>
+                        Lavagens por Contrato
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="graficoContrato" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Lavagens por Transporte/Equipamento -->
+        <div class="col-md-6">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-truck-moving me-2"></i>
+                        Lavagens por Transporte/Equipamento
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="graficoTransporte" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Tabela de Resumo -->
     <div class="card-custom">
         <div class="card-header-custom">
@@ -590,6 +624,27 @@ new Chart(ctxMateriais, {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <div class="row mb-4">
         <!-- Gráfico de Lavagens por Contrato -->
         <div class="col-md-6">
@@ -672,12 +727,7 @@ new Chart(ctxContrato, {
         }
     }
 });
-</script>
 
-
-
-
-<script>
 // Gráfico de Lavagens por Transporte/Equipamento (Barras Horizontais)
 const ctxTransporte = document.getElementById("graficoTransporte").getContext("2d");
 new Chart(ctxTransporte, {
@@ -687,8 +737,8 @@ new Chart(ctxTransporte, {
         datasets: [{
             label: "Número de Lavagens",
             data: {{ transporte_dados|safe }},
-            backgroundColor: "#6f42c1",
-            borderColor: "#5a32a8",
+            backgroundColor: "#fd7e14",
+            borderColor: "#e85e00",
             borderWidth: 1
         }]
     },
