@@ -204,6 +204,12 @@
 
 
 
+
+
+
+
+
+
     <div class="row mb-4">
         <!-- Gráfico de Lavagens por Contrato -->
         <div class="col-md-6">
@@ -619,6 +625,292 @@ new Chart(ctxMateriais, {
     }
 });
 
+
+<script>
+// Gráfico de Lavagens por Contrato (Barras Horizontais)
+const ctxContrato = document.getElementById("graficoContrato").getContext("2d");
+new Chart(ctxContrato, {
+    type: "bar",
+    data: {
+        labels: {{ contrato_labels|safe }},
+        datasets: [{
+            label: "Número de Lavagens",
+            data: {{ contrato_dados|safe }},
+            backgroundColor: "#20c997",
+            borderColor: "#17a2b8",
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            },
+            y: {
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: "#ffffff"
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Lavagens por Transporte/Equipamento (Barras Horizontais)
+const ctxTransporte = document.getElementById("graficoTransporte").getContext("2d");
+new Chart(ctxTransporte, {
+    type: "bar",
+    data: {
+        labels: {{ transporte_labels|safe }},
+        datasets: [{
+            label: "Número de Lavagens",
+            data: {{ transporte_dados|safe }},
+            backgroundColor: "#fd7e14",
+            borderColor: "#e85e00",
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            },
+            y: {
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: "#ffffff"
+                }
+            }
+        }
+    }
+});
+</script>
+
+<script>
+// Gráfico de Lavagens por Contrato (Barras Horizontais)
+const ctxContrato = document.getElementById("graficoContrato").getContext("2d");
+new Chart(ctxContrato, {
+    type: "bar",
+    data: {
+        labels: {{ contrato_labels|safe }},
+        datasets: [{
+            label: "Número de Lavagens",
+            data: {{ contrato_dados|safe }},
+            backgroundColor: "#20c997",
+            borderColor: "#17a2b8",
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            },
+            y: {
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: "#ffffff"
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Lavagens por Transporte/Equipamento (Barras Horizontais)
+const ctxTransporte = document.getElementById("graficoTransporte").getContext("2d");
+new Chart(ctxTransporte, {
+    type: "bar",
+    data: {
+        labels: {{ transporte_labels|safe }},
+        datasets: [{
+            label: "Número de Lavagens",
+            data: {{ transporte_dados|safe }},
+            backgroundColor: "#fd7e14",
+            borderColor: "#e85e00",
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            },
+            y: {
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: "#ffffff"
+                }
+            }
+        }
+    }
+});
+
+<script>
+// Gráfico de Lavagens por Contrato (Barras Horizontais)
+const ctxContrato = document.getElementById("graficoContrato").getContext("2d");
+new Chart(ctxContrato, {
+    type: "bar",
+    data: {
+        labels: {{ contrato_labels|safe }},
+        datasets: [{
+            label: "Número de Lavagens",
+            data: {{ contrato_dados|safe }},
+            backgroundColor: "#20c997",
+            borderColor: "#17a2b8",
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            },
+            y: {
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: "#ffffff"
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Lavagens por Transporte/Equipamento (Barras Horizontais)
+const ctxTransporte = document.getElementById("graficoTransporte").getContext("2d");
+new Chart(ctxTransporte, {
+    type: "bar",
+    data: {
+        labels: {{ transporte_labels|safe }},
+        datasets: [{
+            label: "Número de Lavagens",
+            data: {{ transporte_dados|safe }},
+            backgroundColor: "#fd7e14",
+            borderColor: "#e85e00",
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            },
+            y: {
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: "#ffffff"
+                }
+            }
+        }
+    }
+});
 </script>
 {% endblock %}
 
@@ -645,37 +937,7 @@ new Chart(ctxMateriais, {
 
 
 
-    <div class="row mb-4">
-        <!-- Gráfico de Lavagens por Contrato -->
-        <div class="col-md-6">
-            <div class="card-custom">
-                <div class="card-header-custom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-file-contract me-2"></i>
-                        Lavagens por Contrato
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="graficoContrato" width="400" height="300"></canvas>
-                </div>
-            </div>
-        </div>
 
-        <!-- Gráfico de Lavagens por Transporte/Equipamento -->
-        <div class="col-md-6">
-            <div class="card-custom">
-                <div class="card-header-custom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-truck-moving me-2"></i>
-                        Lavagens por Transporte/Equipamento
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="graficoTransporte" width="400" height="300"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
 
