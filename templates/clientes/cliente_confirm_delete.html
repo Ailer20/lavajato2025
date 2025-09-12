@@ -4,8 +4,8 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Confirmar Exclusão de Cliente</h2>
-    <p>Tem certeza de que deseja excluir o cliente "{{ cliente.nome }}"?</p>
+    <h2 class="mb-4">Confirmar Exclusão de Contrato/Setor</h2>
+    <p>Tem certeza de que deseja excluir o Contrato/Setor "{{ cliente.nome }}"?</p>
     <form method="post">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger">Confirmar Exclusão</button>
