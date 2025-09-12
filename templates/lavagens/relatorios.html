@@ -307,9 +307,7 @@
 {% block extra_js %}
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-
 // Configuração global dos gráficos
 Chart.defaults.color = '#ffffff';
 Chart.defaults.borderColor = '#404040';
@@ -482,8 +480,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
-<script>
 // Gráfico de Performance dos Lavadores (Barras)
 const ctxLavadores = document.getElementById("graficoLavadores").getContext("2d");
 new Chart(ctxLavadores, {
@@ -632,10 +628,10 @@ const ctxContrato = document.getElementById("graficoContrato").getContext("2d");
 new Chart(ctxContrato, {
     type: "bar",
     data: {
-        labels: {{ contrato_labels|safe }},
+        labels: JSON.parse('{{ contrato_labels|escapejs }}'),
         datasets: [{
             label: "Número de Lavagens",
-            data: {{ contrato_dados|safe }},
+            data: JSON.parse('{{ contrato_dados|escapejs }}'),
             backgroundColor: "#20c997",
             borderColor: "#17a2b8",
             borderWidth: 1
@@ -679,10 +675,10 @@ const ctxTransporte = document.getElementById("graficoTransporte").getContext("2
 new Chart(ctxTransporte, {
     type: "bar",
     data: {
-        labels: {{ transporte_labels|safe }},
+        labels: JSON.parse("{{ transporte_labels|escapejs }}"),
         datasets: [{
             label: "Número de Lavagens",
-            data: {{ transporte_dados|safe }},
+            data: JSON.parse("{{ transporte_dados|escapejs }}"),
             backgroundColor: "#fd7e14",
             borderColor: "#e85e00",
             borderWidth: 1
@@ -721,17 +717,15 @@ new Chart(ctxTransporte, {
     }
 });
 </script>
-
-<script>
 // Gráfico de Lavagens por Contrato (Barras Horizontais)
 const ctxContrato = document.getElementById("graficoContrato").getContext("2d");
 new Chart(ctxContrato, {
     type: "bar",
     data: {
-        labels: {{ contrato_labels|safe }},
+        labels: JSON.parse('{{ contrato_labels|escapejs }}'),
         datasets: [{
             label: "Número de Lavagens",
-            data: {{ contrato_dados|safe }},
+            data: JSON.parse('{{ contrato_dados|escapejs }}'),
             backgroundColor: "#20c997",
             borderColor: "#17a2b8",
             borderWidth: 1
@@ -775,10 +769,10 @@ const ctxTransporte = document.getElementById("graficoTransporte").getContext("2
 new Chart(ctxTransporte, {
     type: "bar",
     data: {
-        labels: {{ transporte_labels|safe }},
+        labels: JSON.parse("{{ transporte_labels|escapejs }}"),
         datasets: [{
             label: "Número de Lavagens",
-            data: {{ transporte_dados|safe }},
+            data: JSON.parse("{{ transporte_dados|escapejs }}"),
             backgroundColor: "#fd7e14",
             borderColor: "#e85e00",
             borderWidth: 1
@@ -823,10 +817,10 @@ const ctxContrato = document.getElementById("graficoContrato").getContext("2d");
 new Chart(ctxContrato, {
     type: "bar",
     data: {
-        labels: {{ contrato_labels|safe }},
+        labels: JSON.parse('{{ contrato_labels|escapejs }}'),
         datasets: [{
             label: "Número de Lavagens",
-            data: {{ contrato_dados|safe }},
+            data: JSON.parse('{{ contrato_dados|escapejs }}'),
             backgroundColor: "#20c997",
             borderColor: "#17a2b8",
             borderWidth: 1
@@ -870,10 +864,10 @@ const ctxTransporte = document.getElementById("graficoTransporte").getContext("2
 new Chart(ctxTransporte, {
     type: "bar",
     data: {
-        labels: {{ transporte_labels|safe }},
+        labels: JSON.parse("{{ transporte_labels|escapejs }}"),
         datasets: [{
             label: "Número de Lavagens",
-            data: {{ transporte_dados|safe }},
+            data: JSON.parse("{{ transporte_dados|escapejs }}"),
             backgroundColor: "#fd7e14",
             borderColor: "#e85e00",
             borderWidth: 1
@@ -948,10 +942,10 @@ const ctxContrato = document.getElementById("graficoContrato").getContext("2d");
 new Chart(ctxContrato, {
     type: "bar",
     data: {
-        labels: {{ contrato_labels|safe }},
+        labels: JSON.parse('{{ contrato_labels|escapejs }}'),
         datasets: [{
             label: "Número de Lavagens",
-            data: {{ contrato_dados|safe }},
+            data: JSON.parse('{{ contrato_dados|escapejs }}'),
             backgroundColor: "#20c997",
             borderColor: "#17a2b8",
             borderWidth: 1
@@ -995,10 +989,10 @@ const ctxTransporte = document.getElementById("graficoTransporte").getContext("2
 new Chart(ctxTransporte, {
     type: "bar",
     data: {
-        labels: {{ transporte_labels|safe }},
+        labels: JSON.parse("{{ transporte_labels|escapejs }}"),
         datasets: [{
             label: "Número de Lavagens",
-            data: {{ transporte_dados|safe }},
+            data: JSON.parse("{{ transporte_dados|escapejs }}"),
             backgroundColor: "#fd7e14",
             borderColor: "#e85e00",
             borderWidth: 1
@@ -1037,5 +1031,3 @@ new Chart(ctxTransporte, {
     }
 });
 </script>
-
-
