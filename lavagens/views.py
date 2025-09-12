@@ -5,15 +5,20 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
-from .models import Lavagem, TipoLavagem, Base, TransporteEquipamento, Agendamento
+from .models import Lavagem, TipoLavagem, Base, TransporteEquipamento, Agendamento, MaterialLavagem
 from clientes.models import Cliente, Veiculo, Lavador
-from .forms import BaseForm, TipoLavagemForm, TransporteEquipamentoForm
+from .forms import BaseForm, TipoLavagemForm, TransporteEquipamentoForm, MaterialLavagemFormSet
 import json
+# Alternativa recomendada
+from django.db import models
+from django.db.models import Q, Count, Sum, Avg
+
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.contrib.auth.decorators import login_required
+# Linha CORRIGIDA para colocar no seu views.py
 
-
+from .models import Lavagem, Base, TipoLavagem
 @login_required
 def dashboard(request):
     search_query = request.GET.get("search", "")
@@ -193,27 +198,33 @@ def api_buscar_veiculo(request):
     return JsonResponse({"found": False})
 
 
+
 @login_required
 def relatorios(request):
-    from django.db.models import Count, Sum, Avg
-    from decimal import Decimal
-    import json
-    
-    data_inicio = request.GET.get("data_inicio")
-    data_fim = request.GET.get("data_fim")
-    
-    if not data_inicio or not data_fim:
-        hoje = timezone.now().date()
-        data_inicio = hoje.replace(day=1)
+    data_inicio_str = request.GET.get("data_inicio")
+    data_fim_str = request.GET.get("data_fim")
+    base_filtro_id = request.GET.get("base_filtro") # Captura o ID da base para filtro
+
+    hoje = timezone.now().date()
+
+    # Definir datas padrão se não forem fornecidas
+    if not data_inicio_str or not data_fim_str:
+        data_inicio = hoje.replace(day=1) # Início do mês atual
         data_fim = hoje
     else:
-        data_inicio = datetime.strptime(data_inicio, "%Y-%m-%d").date()
-        data_fim = datetime.strptime(data_fim, "%Y-%m-%d").date()
+        data_inicio = datetime.strptime(data_inicio_str, "%Y-%m-%d").date()
+        data_fim = datetime.strptime(data_fim_str, "%Y-%m-%d").date()
     
+    # Filtrar lavagens pelo período
     lavagens_periodo = Lavagem.objects.filter(
         data_lavagem__range=[data_inicio, data_fim]
     )
+
+    # Aplicar filtro de base, se houver
+    if base_filtro_id:
+        lavagens_periodo = lavagens_periodo.filter(base_id=base_filtro_id)
     
+    # --- Cálculos de Estatísticas ---
     total_lavagens = lavagens_periodo.count()
     lavagens_em_andamento = lavagens_periodo.filter(status="EM_ANDAMENTO").count()
     lavagens_concluidas = lavagens_periodo.filter(status="CONCLUIDA").count()
@@ -225,32 +236,96 @@ def relatorios(request):
     
     faturamento_dia = Lavagem.objects.filter(
         status="CONCLUIDA",
-        data_lavagem=timezone.now().date()
+        data_lavagem=hoje # Faturamento do dia atual
     ).aggregate(total=Sum("valor_final"))["total"] or Decimal("0.00")
     
-    tempo_medio = 0
+    # Tempo médio de lavagem (apenas para lavagens concluídas com hora de início e término)
+    tempo_medio_lavagem_segundos = lavagens_periodo.filter(
+        status="CONCLUIDA",
+        hora_inicio__isnull=False,
+        hora_termino__isnull=False
+    ).annotate(
+        duracao_segundos=(models.F('hora_termino') - models.F('hora_inicio'))
+    ).aggregate(
+        avg_duracao=Avg('duracao_segundos')
+    )['avg_duracao']
+
+    tempo_medio = int(tempo_medio_lavagem_segundos.total_seconds() / 60) if tempo_medio_lavagem_segundos else 0
     
-    lavagens_por_base = {}
-    lavagens_por_tipo = {}
+    # --- Dados para o Gráfico de Lavagens por Base ---
+    lavagens_por_base_query = (
+        lavagens_periodo
+        .filter(base__isnull=False) # Garante que só bases válidas sejam contadas
+        .values('base__nome')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+    lavagens_por_base = {item['base__nome']: item['total'] for item in lavagens_por_base_query}
+
+    # --- Dados para o Gráfico de Lavagens por Tipo (se você for usar) ---
+    lavagens_por_tipo_query = (
+        lavagens_periodo
+        .filter(tipo_lavagem__isnull=False) # Garante que só tipos válidos sejam contados
+        .values('tipo_lavagem__nome')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+    lavagens_por_tipo = {item['tipo_lavagem__nome']: item['total'] for item in lavagens_por_tipo_query}
     
-    from datetime import timedelta
+    # --- Dados para o Gráfico de Faturamento por Período (Linha) ---
     faturamento_labels = []
     faturamento_dados = []
     
-    for i in range(30):
-        data = timezone.now().date() - timedelta(days=i)
-        faturamento_dia_grafico = Lavagem.objects.filter(
+    # Gerar labels e dados para cada dia no período selecionado
+    delta = data_fim - data_inicio
+    for i in range(delta.days + 1):
+        dia = data_inicio + timedelta(days=i)
+        faturamento_dia_grafico = lavagens_periodo.filter(
             status="CONCLUIDA",
-            data_lavagem=data
+            data_lavagem=dia
         ).aggregate(total=Sum("valor_final"))["total"] or 0
         
-        faturamento_labels.insert(0, data.strftime("%d/%m"))
-        faturamento_dados.insert(0, float(faturamento_dia_grafico))
+        faturamento_labels.append(dia.strftime("%d/%m"))
+        faturamento_dados.append(float(faturamento_dia_grafico))
     
+    # --- Ticket Médio ---
     ticket_medio = 0
     if lavagens_concluidas > 0:
         ticket_medio = faturamento_mes / lavagens_concluidas
     
+    # --- Performance dos Lavadores ---
+    performance_lavadores = lavagens_periodo.filter(status="CONCLUIDA", lavador__isnull=False)\
+        .values("lavador__nome")\
+        .annotate(total_lavagens_concluidas=Count("id"))\
+        .order_by("-total_lavagens_concluidas")
+
+    lavadores_labels = [item['lavador__nome'] for item in performance_lavadores]
+    lavadores_dados = [item['total_lavagens_concluidas'] for item in performance_lavadores]
+
+    # --- Ranking de Carros/Contratos ---
+    ranking_carros_contratos = lavagens_periodo.filter(status="CONCLUIDA")\
+        .values("placa_veiculo", "contrato")\
+        .annotate(total_lavagens=Count("id"))\
+        .order_by("-total_lavagens")[:10] # Top 10
+
+    ranking_labels = [f"{item['placa_veiculo']} ({item['contrato'] if item['contrato'] else 'N/A'})" for item in ranking_carros_contratos]
+    ranking_dados = [item['total_lavagens'] for item in ranking_carros_contratos]
+
+    # --- Consumo de Materiais por Mês ---
+    # Esta parte será mais complexa e precisará de um loop ou agregação mais avançada
+    # para somar os materiais de cada tipo de lavagem associada às lavagens concluídas.
+    # Por enquanto, vamos deixar como um placeholder.
+    consumo_materiais = {}
+    # Para cada lavagem concluída no período, somar os materiais do tipo de lavagem associado
+    for lavagem in lavagens_periodo.filter(status="CONCLUIDA").select_related("tipo_lavagem").prefetch_related("tipo_lavagem__materiais"):
+        if lavagem.tipo_lavagem:
+            for material in lavagem.tipo_lavagem.materiais.all():
+                consumo_materiais[material.nome] = consumo_materiais.get(material.nome, Decimal('0.00')) + material.valor
+
+    materiais_labels = list(consumo_materiais.keys())
+    materiais_dados = [float(value) for value in consumo_materiais.values()]
+
+    # --- Contexto para o Template ---
     estatisticas = {
         "total_lavagens": total_lavagens,
         "lavagens_em_andamento": lavagens_em_andamento,
@@ -258,21 +333,33 @@ def relatorios(request):
         "lavagens_canceladas": lavagens_canceladas,
         "faturamento_mes": faturamento_mes,
         "faturamento_dia": faturamento_dia,
-        "tempo_medio_lavagem": int(tempo_medio),
+        "tempo_medio_lavagem": tempo_medio,
         "lavagens_por_base": lavagens_por_base,
-        "lavagens_por_tipo": lavagens_por_tipo
+        "lavagens_por_tipo": lavagens_por_tipo,
     }
     
+    # Obter todas as bases para o filtro do template
+    bases_disponiveis = Base.objects.all().order_by('nome')
+
     context = {
         "estatisticas": estatisticas,
-        "data_inicio": data_inicio,
-        "data_fim": data_fim,
+        "data_inicio": data_inicio.strftime('%Y-%m-%d'),
+        "data_fim": data_fim.strftime('%Y-%m-%d'),
         "ticket_medio": ticket_medio,
         "faturamento_labels": json.dumps(faturamento_labels),
         "faturamento_dados": json.dumps(faturamento_dados),
+        "bases": bases_disponiveis,
+        "base_filtro": base_filtro_id,
+        "lavadores_labels": json.dumps(lavadores_labels),
+        "lavadores_dados": json.dumps(lavadores_dados),
+        "ranking_labels": json.dumps(ranking_labels),
+        "ranking_dados": json.dumps(ranking_dados),
+        "materiais_labels": json.dumps(materiais_labels),
+        "materiais_dados": json.dumps(materiais_dados),
     }
     
     return render(request, "lavagens/relatorios.html", context)
+
 
 
 
@@ -325,26 +412,33 @@ def tipo_lavagem_list(request):
 def tipo_lavagem_create(request):
     if request.method == 'POST':
         form = TipoLavagemForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Tipo de Lavagem adicionado com sucesso!')
+        formset = MaterialLavagemFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            tipo_lavagem = form.save()
+            formset.instance = tipo_lavagem
+            formset.save()
+            messages.success(request, 'Tipo de Lavagem e materiais adicionados com sucesso!')
             return redirect('tipo_lavagem_list')
     else:
         form = TipoLavagemForm()
-    return render(request, 'lavagens/tipo_lavagem_form.html', {'form': form, 'action': 'Adicionar Tipo de Lavagem'})
+        formset = MaterialLavagemFormSet()
+    return render(request, 'lavagens/tipo_lavagem_form.html', {'form': form, 'formset': formset, 'action': 'Adicionar Tipo de Lavagem'})
 
 @login_required
 def tipo_lavagem_update(request, pk):
     tipo_lavagem = get_object_or_404(TipoLavagem, pk=pk)
     if request.method == 'POST':
         form = TipoLavagemForm(request.POST, instance=tipo_lavagem)
-        if form.is_valid():
+        formset = MaterialLavagemFormSet(request.POST, instance=tipo_lavagem)
+        if form.is_valid() and formset.is_valid():
             form.save()
-            messages.success(request, 'Tipo de Lavagem atualizado com sucesso!')
+            formset.save()
+            messages.success(request, 'Tipo de Lavagem e materiais atualizados com sucesso!')
             return redirect('tipo_lavagem_list')
     else:
         form = TipoLavagemForm(instance=tipo_lavagem)
-    return render(request, 'lavagens/tipo_lavagem_form.html', {'form': form, 'action': 'Editar Tipo de Lavagem'})
+        formset = MaterialLavagemFormSet(instance=tipo_lavagem)
+    return render(request, 'lavagens/tipo_lavagem_form.html', {'form': form, 'formset': formset, 'action': 'Editar Tipo de Lavagem'})
 
 @login_required
 def tipo_lavagem_delete(request, pk):

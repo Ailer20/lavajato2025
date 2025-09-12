@@ -1,63 +1,66 @@
 {% extends 'base/base.html' %}
 {% load static %}
-{% block title %}{{ action }}{% endblock %}
 
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">       <!-- 1. Cérebro (Variáveis ) -->
-    <link rel="stylesheet" href="{% static 'css/components.css' %}"> <!-- 2. Componentes -->
-    <link rel="stylesheet" href="{% static 'css/pages.css' %}">      <!-- 3. Páginas Específicas -->
-{% endblock %}
+{% block title %}{{ action }}{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8">
+        <div class="col-lg-8">
             
-            <!-- 1. Usamos a classe 'form-container' para aplicar o tema escuro. -->
-            <div class="form-container"> 
-                
-                <h3>{{ action }}</h3>
+            <!-- Usando o .card-custom para um visual consistente e temático -->
+            <div class="card-custom">
+                <!-- Usando o .card-header-custom para o título -->
+                <div class="card-header-custom">
+                    <h4 class="mb-0">{{ action }}</h4>
+                </div>
 
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    
-                    {% for field in form %}
-                        <div class="row mb-4 align-items-center">
-                            
-                            <!-- 2. Usamos 'form-label-custom' para o estilo dos rótulos. -->
-                            <label for="{{ field.id_for_label }}" class="col-sm-3 text-sm-end form-label-custom">
-                                {{ field.label }}
-                            </label>
-                            <div class="col-sm-9">
-                                <!-- O campo {{ field }} receberá a classe 'form-control-custom' do forms.py -->
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Renderização manual dos campos para controle total do estilo -->
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <!-- A classe .form-label já é estilizada pelo nosso components.css -->
+                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                
+                                <!-- 
+                                O campo em si. A classe .form-control ou .form-select será
+                                adicionada automaticamente pelo FormStyleMixin no seu forms.py.
+                                -->
                                 {{ field }}
                                 
                                 {% if field.help_text %}
-                                    <small class="form-text">{{ field.help_text }}</small>
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
                                 {% endif %}
+                                
                                 {% for error in field.errors %}
                                     <div class="invalid-feedback d-block">
                                         {{ error }}
                                     </div>
                                 {% endfor %}
                             </div>
-                        </div>
-                    {% endfor %}
-                    
-                    <hr>
+                        {% endfor %}
+                        
+                        <hr class="my-4">
 
-                    <div class="row">
-                        <div class="col-sm-9 offset-sm-3 d-flex align-items-center">
-                            <!-- 3. Usamos 'btn-success-custom' e 'local-btn' para os botões. -->
-                            <button type="submit" class="btn btn-success-custom me-2">
-                                <i class="fas fa-save me-1"></i> <!-- Ícone opcional -->
+                        <!-- Botões alinhados à direita para uma melhor UX -->
+                        <div class="d-flex justify-content-end">
+                            <!-- Botão Cancelar -->
+                            <a href="{% url 'lavador_list' %}" class="btn btn-secondary me-2">
+                                <i class="fas fa-times me-1"></i>
+                                Cancelar
+                            </a>
+                            
+                            <!-- Botão Salvar com nosso estilo personalizado -->
+                            <button type="submit" class="btn btn-success-custom">
+                                <i class="fas fa-save me-1"></i>
                                 Salvar
                             </button>
-                            <!-- ATENÇÃO: O link de 'Cancelar' deve apontar para a lista correta. -->
-                            <a href="{% url 'lavador_list' %}" class="btn local-btn">Cancelar</a>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
 
         </div>

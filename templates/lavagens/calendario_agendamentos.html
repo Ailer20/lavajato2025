@@ -10,42 +10,6 @@
     
     <!-- Adicionando os arquivos do FullCalendar -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
-    <style>
-        /* Estilos para o calendário */
-        #calendario {
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 0 10px;
-            color: #e0e0e0; /* Cor do texto geral */
-        }
-        /* Customizando as cores do FullCalendar para o seu tema escuro */
-        :root {
-            --fc-border-color: #4b5563;
-            --fc-daygrid-day-bg-color: #1f2937;
-            --fc-list-even-row-bg-color: #374151;
-            --fc-list-odd-row-bg-color: #1f2937;
-        }
-        .fc-day-today {
-            background: rgba(59, 130, 246, 0.1 ) !important;
-        }
-        .fc-event {
-            cursor: pointer;
-        }
-        .fc-event-title {
-            font-weight: 600;
-        }
-        .fc-toolbar-title {
-            color: #f3f4f6;
-        }
-        .fc .fc-button-primary {
-            background-color: #3b82f6;
-            border-color: #3b82f6;
-        }
-        .fc .fc-button-primary:hover {
-            background-color: #1d4ed8;
-            border-color: #1d4ed8;
-        }
-    </style>
 {% endblock %}
 
 {% block content %}

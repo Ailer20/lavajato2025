@@ -145,3 +145,49 @@ textarea.form-control {
 /* --- Estilo Específico para Campo de Status Desabilitado --- */
 .form-control-status { background-color: var(--warning-color); color: var(--warning-color); font-weight: 600; text-align: center; opacity: 1 !important; border-color: var(--warning-color); }
 .form-control-status option { background-color: var(--input-bg); color: var(--text-light); }
+
+/* --- Campos de Exibição de Dados (Páginas de Detalhes) --- */
+.display-field {
+    background-color: var(--input-bg) !important; /* Garante a sobreposição */
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    width: 100%;
+    min-height: calc(1.5em + 1.5rem + 2px); /* Mesma altura dos inputs */
+    word-wrap: break-word;
+    display: flex; /* Adicionado para alinhamento vertical */
+    align-items: center; /* Adicionado para alinhamento vertical */
+}
+
+.bg-dark {
+    --bs-bg-opacity: 1;
+    background-color: var(--campo-texto-bg) !important
+}
+
+input.form-control,
+select.form-select,
+textarea.form-control {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+    
+    /* --- ADICIONE ESTA LINHA --- */
+    color-scheme: var(--color-scheme); /* Controla a cor do ícone do calendário */
+}
+input.form-control:focus,
+select.form-select:focus,
+textarea.form-control:focus {
+    background-color: var(--input-focus-bg) !important;
+    border-color: var(--border-focus-color);
+    color: var(--text-light);
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb, 59, 130, 246), 0.25);
+    outline: none;
+}
+
+input.form-control::placeholder {
+    color: var(--text-placeholder);
+}

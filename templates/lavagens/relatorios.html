@@ -59,12 +59,6 @@
                     </div>
                 </form>
             </div>
-            <div class="col-md-4 text-end">
-                <button class="btn btn-success-custom" onclick="exportarRelatorio()">
-                    <i class="fas fa-download me-2"></i>
-                    Exportar PDF
-                </button>
-            </div>
         </div>
     </div>
 
@@ -158,6 +152,56 @@
         </div>
     </div>
 
+    <!-- Novos Gráficos -->
+    <div class="row mb-4">
+        <!-- Performance dos Lavadores -->
+        <div class="col-md-6">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>
+                        Performance dos Lavadores
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="graficoLavadores" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ranking de Carros/Contratos -->
+        <div class="col-md-6">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>
+                        Ranking de Carros/Contratos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="graficoRanking" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Consumo de Materiais por Mês -->
+        <div class="col-12">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-box-open me-2"></i>
+                        Consumo de Materiais por Mês
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="graficoMateriais" width="800" height="400"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Tabela de Resumo -->
     <div class="card-custom">
         <div class="card-header-custom">
@@ -225,6 +269,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+
 // Configuração global dos gráficos
 Chart.defaults.color = '#ffffff';
 Chart.defaults.borderColor = '#404040';
@@ -396,6 +441,131 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('data_fim').value = hoje.toISOString().split('T')[0];
     }
 });
+</script>
+
+<script>
+// Gráfico de Performance dos Lavadores (Barras)
+const ctxLavadores = document.getElementById("graficoLavadores").getContext("2d");
+new Chart(ctxLavadores, {
+    type: "bar",
+    data: {
+        labels: {{ lavadores_labels|safe }},
+        datasets: [{
+            label: "Lavagens Concluídas",
+            data: {{ lavadores_dados|safe }},
+            backgroundColor: "#007bff",
+            borderColor: "#0056b3",
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            },
+            x: {
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: "#ffffff"
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Ranking de Carros/Contratos (Barras Horizontais)
+const ctxRanking = document.getElementById("graficoRanking").getContext("2d");
+new Chart(ctxRanking, {
+    type: "bar",
+    data: {
+        labels: {{ ranking_labels|safe }},
+        datasets: [{
+            label: "Número de Lavagens",
+            data: {{ ranking_dados|safe }},
+            backgroundColor: "#6f42c1",
+            borderColor: "#5a32a8",
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            },
+            x: {
+                ticks: {
+                    color: "#ffffff"
+                },
+                grid: {
+                    color: "#404040"
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: "#ffffff"
+                }
+            }
+        }
+    }
+});
+
+// Gráfico de Consumo de Materiais por Mês (Pizza/Doughnut)
+const ctxMateriais = document.getElementById("graficoMateriais").getContext("2d");
+new Chart(ctxMateriais, {
+    type: "doughnut",
+    data: {
+        labels: {{ materiais_labels|safe }},
+        datasets: [{
+            data: {{ materiais_dados|safe }},
+            backgroundColor: [
+                "#fd7e14", "#20c997", "#6610f2", "#e83e8c", "#ffc107", "#17a2b8", "#dc3545", "#6c757d"
+            ],
+            borderWidth: 2,
+            borderColor: "#2d2d2d"
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: "bottom",
+                labels: {
+                    color: "#ffffff",
+                    padding: 20
+                }
+            }
+        }
+    }
+});
+
 </script>
 {% endblock %}
 

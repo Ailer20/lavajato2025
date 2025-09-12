@@ -155,3 +155,17 @@ class TransporteEquipamento(models.Model):
         return self.nome
 
 
+
+
+
+class MaterialLavagem(models.Model):
+    tipo_lavagem = models.ForeignKey(TipoLavagem, on_delete=models.CASCADE, related_name='materiais')
+    nome = models.CharField(max_length=100)
+    valor = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        verbose_name = "Material da Lavagem"
+        verbose_name_plural = "Materiais da Lavagem"
+
+    def __str__(self):
+        return f"{self.nome} ({self.tipo_lavagem.nome})"

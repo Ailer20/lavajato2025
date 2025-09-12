@@ -5,6 +5,7 @@
 /* 1. DEFINIÇÃO DAS VARIÁVEIS DE TEMA */
 :root {
     /* Tema Escuro (Padrão) */
+    --color-scheme: dark; /* ADICIONE ESTA LINHA */
     --primary-color: #3b82f6; --primary-dark: #1d4ed8;
     --success-color: #10b981; --success-dark: #059669;
     --warning-color: #f59e0b; --danger-color: #ef4444;
@@ -13,10 +14,12 @@
     --input-bg: #374151; --input-focus-bg: #4b5563; --hover-bg: #374151;
     --text-light: #f3f4f6; --text-muted: #9ca3af; --text-placeholder: #6b7280; --text-white: #ffffff;
     --border-color: #4b5563; --border-focus-color: #3b82f6;
+    --campo-texto-bg: #4b5563;
 }
 
 body.light-theme {
     /* Tema Claro */
+    --color-scheme: light; /* ADICIONE ESTA LINHA */
     --primary-color: #0d6efd; --primary-dark: #0a58ca;
     --success-color: #198754; --success-dark: #146c43;
     --warning-color: #ffc107; --danger-color: #dc3545;
@@ -25,6 +28,8 @@ body.light-theme {
     --input-bg: #ffffff; --input-focus-bg: #ffffff; --hover-bg: #f1f3f5;
     --text-light: #212529; --text-muted: #6c757d; --text-placeholder: #6c757d; --text-white: #ffffff;
     --border-color: #dee2e6; --border-focus-color: #86b7fe;
+    --campo-texto-bg: rgba(214, 214, 214, 0.651);
+
 }
 
 /* 2. ESTILOS GLOBAIS */

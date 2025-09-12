@@ -1,37 +1,43 @@
 from django import forms
 from .models import Cliente, Veiculo, Lavador
 
-
-class ClienteForm(forms.ModelForm):
+class FormStyleMixin:
+    """
+    Um Mixin reutilizável para aplicar classes CSS do Bootstrap a todos os 
+    campos de um formulário, garantindo um visual consistente.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Aplica a classe 'form-control' a todos os campos
         for field_name, field in self.fields.items():
-            # Para checkboxes, o estilo é diferente
-            if isinstance(field.widget, forms.CheckboxInput):
-                field.widget.attrs['class'] = 'form-check-input'
+            widget = field.widget
+            
+            # Define a classe padrão com base no tipo de widget
+            if isinstance(widget, forms.CheckboxInput):
+                # Checkboxes usam 'form-check-input'
+                css_class = 'form-check-input'
+            elif isinstance(widget, forms.Select):
+                # Selects (menus suspensos) usam 'form-select'
+                css_class = 'form-select'
             else:
-                field.widget.attrs['class'] = 'form-control'
-    
+                # Todos os outros campos (texto, número, data, etc.) usam 'form-control'
+                css_class = 'form-control'
+            
+            # Aplica a classe ao widget do campo
+            widget.attrs.update({'class': css_class})
+
+
+
+class ClienteForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = Cliente
         fields = '__all__'
 
-class VeiculoForm(forms.ModelForm):
+class VeiculoForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = Veiculo
         fields = '__all__'
 
-class LavadorForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Este loop aplica as classes CSS a todos os campos do formulário
-        for field_name, field in self.fields.items():
-            if isinstance(field.widget, forms.CheckboxInput):
-                field.widget.attrs['class'] = 'form-check-input form-control-custom'
-            else:
-                field.widget.attrs['class'] = 'form-control-custom'
-
+class LavadorForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = Lavador
         fields = '__all__'

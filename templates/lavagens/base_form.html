@@ -1,17 +1,58 @@
-{% extends "base/base.html" %}
+{% extends 'base/base.html' %}
+{% load static %}
 
 {% block title %}{{ action }}{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">{{ action }}</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Salvar</button>
-        <a href="{% url 'base_list' %}" class="btn btn-secondary">Cancelar</a>
-    </form>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h4 class="mb-0">{{ action }}</h4>
+                </div>
+
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {# Itera sobre cada campo do formulário para aplicar o estilo #}
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                
+                                {{ field }} {# O campo em si, que receberá a classe via forms.py #}
+                                
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                        
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a href="{{ cancel_url }}" class="btn btn-secondary me-2">
+                                <i class="fas fa-times me-1"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success-custom">
+                                <i class="fas fa-save me-1"></i>
+                                Salvar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </div>
 {% endblock %}
-
-

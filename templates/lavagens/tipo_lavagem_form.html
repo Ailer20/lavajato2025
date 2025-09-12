@@ -1,17 +1,130 @@
-{% extends "base/base.html" %}
+{% extends 'base/base.html' %}
+{% load static %}
 
 {% block title %}{{ action }}{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">{{ action }}</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Salvar</button>
-        <a href="{% url "tipo_lavagem_list" %}" class="btn btn-secondary">Cancelar</a>
-    </form>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <!-- Usando o .card-custom que já tem o estilo do tema -->
+            <div class="card-custom">
+                <!-- Usando o .card-header-custom para o título -->
+                <div class="card-header-custom">
+                    <h4 class="mb-0">{{ action }}</h4>
+                </div>
+
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- 
+                        Renderização manual dos campos para controle total do estilo.
+                        Isso substitui o {{ form.as_p }}.
+                        -->
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+
+                        <h5 class="mt-4">Materiais Utilizados</h5>
+                        <div id="material-formset-container">
+                            {{ formset.management_form }}
+                            {% for material_form in formset %}
+                                <div class="card mb-2 p-3 material-formset-row">
+                                    {% for hidden_field in material_form.hidden_fields %}
+                                        {{ hidden_field }}
+                                    {% endfor %}
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <label for="{{ material_form.nome.id_for_label }}" class="form-label">Material</label>
+                                            {{ material_form.nome }}
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label for="{{ material_form.valor.id_for_label }}" class="form-label">Valor</label>
+                                            {{ material_form.valor }}
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-end">
+                                            {% if formset.can_delete %}
+                                                <div class="form-check">
+                                                    <label for="{{ material_form.DELETE.id_for_label }}" class="form-check-label">Remover</label>
+                                                    {{ material_form.DELETE }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% for error in material_form.non_field_errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" class="btn btn-info-custom mt-3" id="add-material-button">
+                            <i class="fas fa-plus me-1"></i> Adicionar Material
+                        </button>
+                        
+                        <hr class="my-4">
+
+                        <!-- Botões alinhados à direita -->
+                        <div class="d-flex justify-content-end">
+                            <!-- Botão Cancelar -->
+                            <a href="{% url 'tipo_lavagem_list' %}" class="btn btn-secondary me-2">
+                                <i class="fas fa-times me-1"></i>
+                                Cancelar
+                            </a>
+                            
+                            <!-- Botão Salvar com nosso estilo personalizado -->
+                            <button type="submit" class="btn btn-success-custom">
+                                <i class="fas fa-save me-1"></i>
+                                Salvar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </div>
 {% endblock %}
 
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const addMaterialButton = document.getElementById("add-material-button");
+        const materialFormsetContainer = document.getElementById("material-formset-container");
+        const totalForms = document.getElementById("id_materiais-TOTAL_FORMS");
+
+        addMaterialButton.addEventListener("click", function() {
+            const currentForms = parseInt(totalForms.value);
+            const newForm = materialFormsetContainer.children[0].cloneNode(true);
+
+            newForm.innerHTML = newForm.innerHTML.replace(/__prefix__/g, currentForms);
+            newForm.querySelectorAll("input").forEach(input => {
+                input.value = '';
+                input.id = input.id.replace(/__prefix__/g, currentForms);
+                input.name = input.name.replace(/__prefix__/g, currentForms);
+            });
+            newForm.querySelectorAll("label").forEach(label => {
+                label.htmlFor = label.htmlFor.replace(/__prefix__/g, currentForms);
+            });
+
+            materialFormsetContainer.appendChild(newForm);
+            totalForms.value = currentForms + 1;
+        });
+    });
+</script>
+{% endblock %}
 

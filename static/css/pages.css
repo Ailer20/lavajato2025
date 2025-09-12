@@ -84,3 +84,74 @@ h1, h2, h3, h4, h5, h6 {
 .vencido td {
     background-color: inherit !important; 
 }
+
+
+/* ==========================================================================
+   PÁGINA DO CALENDÁRIO (FULLCALENDAR )
+   ========================================================================== */
+
+#calendario {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 10px;
+}
+
+/* --- Variáveis do FullCalendar usando as variáveis do NOSSO tema --- */
+.fc {
+    --fc-border-color: var(--border-color);
+    --fc-daygrid-day-bg-color: var(--card-bg);
+    --fc-list-even-row-bg-color: var(--card-header-bg);
+    --fc-list-odd-row-bg-color: var(--card-bg);
+    --fc-page-bg-color: var(--background-color);
+    --fc-neutral-bg-color: var(--background-color);
+    --fc-neutral-text-color: var(--text-light);
+    --fc-today-bg-color: rgba(var(--primary-color-rgb, 59, 130, 246), 0.15); /* Usa a cor primária com transparência */
+}
+
+/* Cor do título (Mês/Ano) */
+.fc .fc-toolbar-title {
+    color: var(--text-light);
+}
+
+/* Cor dos textos dos dias (1, 2, 3...) */
+.fc .fc-daygrid-day-number {
+    color: var(--text-muted);
+}
+
+/* Estilo dos botões da barra de ferramentas */
+.fc .fc-button-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--text-white);
+}
+
+.fc .fc-button-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.fc .fc-button-primary:disabled {
+    background-color: var(--gray-color);
+    border-color: var(--gray-color);
+}
+
+/* Estilo do botão "Hoje" quando não está ativo */
+.fc .fc-button {
+    background-color: var(--card-header-bg);
+    border-color: var(--border-color);
+    color: var(--text-light);
+}
+
+.fc .fc-button:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Estilo dos eventos */
+.fc-event {
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.2);
+}
+
+.fc-event-title {
+    font-weight: 600;
+}

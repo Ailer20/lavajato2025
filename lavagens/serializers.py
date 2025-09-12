@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Lavagem
+from .models import Lavagem, MaterialLavagem, TipoLavagem
 from clientes.models import Cliente, Veiculo, Lavador
 
 
@@ -97,5 +97,21 @@ class EstatisticasSerializer(serializers.Serializer):
     faturamento_dia = serializers.DecimalField(max_digits=10, decimal_places=2)
     tempo_medio_lavagem = serializers.IntegerField()
     lavagens_por_status = serializers.DictField()
+
+
+
+
+
+class MaterialLavagemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MaterialLavagem
+        fields = ["id", "nome", "valor"]
+
+class TipoLavagemSerializer(serializers.ModelSerializer):
+    materiais = MaterialLavagemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = TipoLavagem
+        fields = ["id", "nome", "preco_base", "materiais"]
 
 

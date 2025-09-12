@@ -34,17 +34,47 @@ class AgendamentoForm(forms.ModelForm):
         model = Agendamento
         fields = '__all__'
 
-class BaseForm(forms.ModelForm):
+
+
+# 1. CRIE ESTA CLASSE MIXIN
+class FormStyleMixin(forms.Form):
+    """
+    Um Mixin para aplicar classes CSS do Bootstrap a todos os campos de um formulário.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            # Adiciona a classe 'form-control' para a maioria dos campos
+            widget = field.widget
+            if isinstance(widget, forms.CheckboxInput):
+                # Checkboxes usam uma classe diferente
+                widget.attrs.update({'class': 'form-check-input'})
+            elif isinstance(widget, forms.Select):
+                # Selects usam 'form-select'
+                widget.attrs.update({'class': 'form-select'})
+            else:
+                # Inputs de texto, número, email, etc.
+                widget.attrs.update({'class': 'form-control'})
+
+
+# 2. FAÇA SEUS FORMULÁRIOS HERDAREM DO MIXIN
+class BaseForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = Base
         fields = '__all__'
 
-class TipoLavagemForm(forms.ModelForm):
+from django.forms import inlineformset_factory
+from .models import MaterialLavagem
+
+class TipoLavagemForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = TipoLavagem
-        fields = '__all__'
+        fields = ['nome', 'preco_base']
 
-class TransporteEquipamentoForm(forms.ModelForm):
+MaterialLavagemFormSet = inlineformset_factory(TipoLavagem, MaterialLavagem, fields=('nome', 'valor'), extra=1, can_delete=True)
+
+
+class TransporteEquipamentoForm(FormStyleMixin, forms.ModelForm):
     class Meta:
         model = TransporteEquipamento
         fields = '__all__'
