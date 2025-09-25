@@ -21,7 +21,7 @@ class Lavagem(models.Model):
     local = models.CharField('Local', max_length=100, blank=True, null=True)
     tipo_lavagem = models.ForeignKey('TipoLavagem', on_delete=models.PROTECT, related_name='lavagens_tipo', null=True, blank=True)
     transporte_equipamento = models.ForeignKey('TransporteEquipamento', on_delete=models.PROTECT, related_name='lavagens_transporte', null=True, blank=True)
-    lavador = models.ForeignKey(Lavador, on_delete=models.PROTECT, related_name="lavagens", null=True, blank=True)
+    lavadores = models.ManyToManyField(Lavador, related_name="lavagens", blank=True)
     placa_veiculo = models.CharField("Placa do Veículo", max_length=10)
     hora_inicio = models.DateTimeField("Hora de Início")
     hora_termino = models.DateTimeField("Hora de Término", null=True, blank=True)

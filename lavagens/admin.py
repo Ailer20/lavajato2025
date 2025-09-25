@@ -8,19 +8,23 @@ from .agendamento_models import Agendamento
 class LavagemAdmin(admin.ModelAdmin):
     list_display = [
         'codigo', 'placa_veiculo', 'status_colored', 'base', 
-        'tipo_lavagem', 'lavador', 'data_lavagem', 'valor_final'
+        'tipo_lavagem', 'get_lavadores', 'data_lavagem', 'valor_final'
     ]
     list_filter = [
         'status', 'base', 'tipo_lavagem', 'transporte_equipamento',
         'data_lavagem'
     ]
     search_fields = [
-        'codigo', 'placa_veiculo', 'cliente__nome', 'lavador__nome', 
+        'codigo', 'placa_veiculo', 'cliente__nome', 'lavadores__nome', 
         'observacoes'
     ]
     ordering = ['-data_lavagem', '-hora_inicio']
     readonly_fields = ['codigo', 'duracao_lavagem']
-    
+    def get_lavadores(self, obj):
+        return ", ".join([lavador.nome for lavador in obj.lavadores.all()])
+    get_lavadores.short_description = 'Lavadores'
+
+
     fieldsets = (
         ('Informações Básicas', {
             'fields': ('codigo', 'status', 'data_lavagem')
@@ -101,7 +105,7 @@ class AgendamentoAdmin(admin.ModelAdmin):
             'fields': ('cliente', 'placa_veiculo', 'veiculo')
         }),
         ('Local e Serviço', {
-            'fields': ('base', 'tipo_lavagem', 'transporte_equipamento', 'lavador')
+            'fields': ('base', 'tipo_lavagem', 'transporte_equipamento', 'lavadores')
         }),
         ('Contato', {
             'fields': ('telefone_contato', 'email_contato')

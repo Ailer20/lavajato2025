@@ -145,16 +145,19 @@
                             </h5>
                             
                             <div class="mb-3">
-                                <label class="form-label-custom">Lavador:</label>
+                                <label class="form-label-custom">Lavadores:</label> <!-- Alterado para plural -->
                                 <div class="p-2 bg-dark rounded">
-                                    {% if lavagem.lavador %}
-                                        {{ lavagem.lavador.nome }}
+                                    {% if lavagem.lavadores.all %} <!-- CORREÇÃO: usa 'lavadores.all' -->
+                                        <ul class="list-unstyled mb-0">
+                                            {% for lavador in lavagem.lavadores.all %} <!-- CORREÇÃO: Itera sobre a lista -->
+                                                <li><i class="fas fa-user me-2"></i>{{ lavador.nome }}</li>
+                                            {% endfor %}
+                                        </ul>
                                     {% else %}
-                                        <span class="text-muted">Não informado</span>
+                                        <span class="text-muted">Nenhum lavador informado</span>
                                     {% endif %}
                                 </div>
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label-custom">Valor do Serviço:</label>
                                 <div class="p-2 bg-dark rounded">

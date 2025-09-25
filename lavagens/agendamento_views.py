@@ -34,8 +34,11 @@ def agendamentos_dashboard(request):
     busca = request.GET.get("busca", "")
     
     agendamentos = Agendamento.objects.select_related(
-        "cliente", "lavador"
+        "cliente", "veiculo", "base", "tipo_lavagem" # Mantém os outros select_related
+    ).prefetch_related(
+        "lavadores"  # ### CORREÇÃO AQUI ###
     ).all()
+
     
     if status_filter:
         agendamentos = agendamentos.filter(status=status_filter)
@@ -122,22 +125,19 @@ def novo_agendamento(request):
             base = get_object_or_404(Base, id=base_id)
             tipo_lavagem = get_object_or_404(TipoLavagem, id=tipo_lavagem_id)
             transporte_equipamento = get_object_or_404(TransporteEquipamento, id=transporte_id)
-            lavador = get_object_or_404(Lavador, id=request.POST.get('lavador')) if request.POST.get('lavador') else None
+            lavadores_ids = request.POST.getlist('lavadores') # Usar getlist e o nome do campo no plural
 
             # 5. Criar o objeto Agendamento com os campos corretos
-            Agendamento.objects.create(
+            agendamento = Agendamento.objects.create(
                 cliente=cliente,
                 placa_veiculo=placa_veiculo.upper(),
-                # --- CORREÇÃO APLICADA AQUI ---
                 data_agendamento=data_agendamento_obj,
                 hora_agendamento=hora_agendamento_obj,
-                # -----------------------------
                 base=base,
                 local=local,
                 tipo_lavagem=tipo_lavagem,
                 transporte_equipamento=transporte_equipamento,
                 duracao_estimada=int(request.POST.get('duracao_estimada', 30)),
-                lavador=lavador,
                 prioridade=request.POST.get('prioridade', 'NORMAL'),
                 telefone_contato=request.POST.get('telefone_contato', ''),
                 email_contato=request.POST.get('email_contato', ''),
@@ -145,7 +145,11 @@ def novo_agendamento(request):
                 status='AGENDADO',
                 valor_estimado=valor_estimado_obj,
             )
-            
+
+            # ### CORREÇÃO 2: Use a variável 'agendamento' para chamar o .set() ###
+            if lavadores_ids:
+                agendamento.lavadores.set(lavadores_ids)
+
             messages.success(request, 'Agendamento criado com sucesso!')
             return redirect('agendamentos_dashboard')
 

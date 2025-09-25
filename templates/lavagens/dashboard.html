@@ -270,11 +270,11 @@
                                     </td>
                                     <td>{{ lavagem.data_lavagem|date:"d/m/Y" }}</td>
                                     <td>
-                                        {% if lavagem.lavador %}
-                                            {{ lavagem.lavador.nome }}
-                                        {% else %}
+                                        {% for lavador in lavagem.lavadores.all %}
+                                            <span class="badge bg-secondary">{{ lavador.nome }}</span>
+                                        {% empty %}
                                             <span class="text-muted">-</span>
-                                        {% endif %}
+                                        {% endfor %}
                                     </td>
                                     <td>
                                         <span class="status-badge status-concluida">

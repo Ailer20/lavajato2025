@@ -24,3 +24,4 @@ class LavadorAdmin(admin.ModelAdmin):
     list_filter = ["ativo", "data_admissao"]
     search_fields = ['nome', 'cpf', 'telefone']
     ordering = ['nome']
+

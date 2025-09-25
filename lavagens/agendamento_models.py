@@ -57,15 +57,12 @@ class Agendamento(models.Model):
         on_delete=models.PROTECT, 
         related_name="agendamentos"
     )
-    lavador = models.ForeignKey(
-        Lavador, 
-        on_delete=models.PROTECT, 
+    lavadores = models.ManyToManyField(
+        Lavador,
         related_name="agendamentos",
-        null=True, 
-        blank=True,
-        help_text="Lavador designado (opcional)"
+        blank=True,  # blank=True permite que o agendamento seja salvo sem lavadores
+        help_text="Lavadores designados (opcional)"
     )
-    
     placa_veiculo = models.CharField("Placa do Veículo", max_length=10)
     data_agendamento = models.DateField("Data do Agendamento")
     hora_agendamento = models.TimeField("Hora do Agendamento")
@@ -216,7 +213,6 @@ class Agendamento(models.Model):
             local=self.local,
             tipo_lavagem=self.tipo_lavagem,
             transporte_equipamento=self.transporte_equipamento,
-            lavador=self.lavador,
             placa_veiculo=self.placa_veiculo,
             hora_inicio=timezone.now(),
             data_lavagem=timezone.now().date(),
@@ -224,6 +220,10 @@ class Agendamento(models.Model):
             desconto=self.desconto_agendamento,
             observacoes=f"Criada a partir do agendamento {self.codigo}. {self.observacoes}".strip()
         )
+        lavadores_do_agendamento = self.lavadores.all()
+        if lavadores_do_agendamento:
+            # Associa a mesma lista de lavadores à nova lavagem
+            lavagem.lavadores.set(lavadores_do_agendamento)
         
         self.status = "EM_ANDAMENTO"
         self.lavagem = lavagem

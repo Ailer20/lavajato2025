@@ -24,17 +24,17 @@ def dashboard(request):
     search_query = request.GET.get("search", "")
     status_filter = request.GET.get("status", "")
     
-    lavagens = Lavagem.objects.select_related(
-        "lavador", "cliente"
-    )
+    lavagens = Lavagem.objects.prefetch_related(
+        "lavadores"
+    ).select_related("cliente")
     
     if search_query:
         lavagens = lavagens.filter(
             Q(codigo__icontains=search_query) |
             Q(placa_veiculo__icontains=search_query) |
             Q(cliente__nome__icontains=search_query) |
-            Q(lavador__nome__icontains=search_query)
-        )
+            Q(lavadores__nome__icontains=search_query)
+        ).distinct() # .distinct() evita resultados duplicados na busca ManyToMany
     
     if status_filter:
         lavagens = lavagens.filter(status=status_filter)
@@ -72,7 +72,7 @@ def nova_lavagem(request):
             local = request.POST.get("local") # <-- CORRIGIDO: Agora busca "local"
             tipo_lavagem_id = request.POST.get("tipo_lavagem") # <-- CORRIGIDO: Agora busca "tipo_lavagem"
             transporte_id = request.POST.get("transporte_equipamento") # <-- CORRIGIDO: Agora busca "transporte_equipamento"
-            lavador_id = request.POST.get("lavador")
+            lavadores_ids = request.POST.getlist("lavadores") 
             hora_inicio_str = request.POST.get("hora_inicio")
             observacoes = request.POST.get("observacoes", "")
             contrato = request.POST.get("contrato", "")
@@ -91,7 +91,6 @@ def nova_lavagem(request):
             base = get_object_or_404(Base, id=base_id)
             tipo_lavagem = get_object_or_404(TipoLavagem, id=tipo_lavagem_id) # Usará o ID correto
             transporte_equipamento = get_object_or_404(TransporteEquipamento, id=transporte_id) # Usará o ID correto
-            lavador = get_object_or_404(Lavador, id=lavador_id) if lavador_id else None
 
             # --- CRIAÇÃO DO OBJETO LAVAGEM ---
             lavagem = Lavagem.objects.create(
@@ -100,7 +99,6 @@ def nova_lavagem(request):
                 local=local,
                 tipo_lavagem=tipo_lavagem,
                 transporte_equipamento=transporte_equipamento,
-                lavador=lavador,
                 hora_inicio=hora_inicio_obj,
                 hora_termino=None,
                 data_lavagem=data_lavagem_obj,
@@ -108,7 +106,11 @@ def nova_lavagem(request):
                 contrato=contrato,
                 valor_servico=valor_servico,
             )
-            
+            if lavadores_ids:
+                # O método .set() espera uma lista de IDs e cuida de criar as relações
+                lavagem.lavadores.set(lavadores_ids)
+
+
             messages.success(request, f"Lavagem {lavagem.codigo} criada com sucesso!")
             return redirect("dashboard")
             
@@ -294,14 +296,13 @@ def relatorios(request):
         ticket_medio = faturamento_mes / lavagens_concluidas
     
     # --- Performance dos Lavadores ---
-    performance_lavadores = lavagens_periodo.filter(status="CONCLUIDA", lavador__isnull=False)\
-        .values("lavador__nome")\
+    performance_lavadores = lavagens_periodo.filter(status="CONCLUIDA", lavadores__isnull=False)\
+        .values("lavadores__nome")\
         .annotate(total_lavagens_concluidas=Count("id"))\
         .order_by("-total_lavagens_concluidas")
 
-    lavadores_labels = [item['lavador__nome'] for item in performance_lavadores]
+    lavadores_labels = [item['lavadores__nome'] for item in performance_lavadores]
     lavadores_dados = [item['total_lavagens_concluidas'] for item in performance_lavadores]
-
     # --- Ranking de Carros/Contratos ---
     ranking_carros_contratos = lavagens_periodo.filter(status="CONCLUIDA")\
         .values("placa_veiculo", "contrato")\
