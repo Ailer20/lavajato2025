@@ -258,7 +258,7 @@
                                     <td>{{ lavagem.base.nome }}</td>
                                     <td>{{ lavagem.local }}</td> 
                                     <td>
-                                        <strong>{{ lavagem.placa_veiculo }}</strong>
+                                        <strong>{{ lavagem.placa_veiculo|cut:"-" }}</strong>
                                     </td>
                                     <td>{{ lavagem.transporte_equipamento.nome }}</td>
                                     <td>

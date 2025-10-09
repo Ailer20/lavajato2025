@@ -17,50 +17,56 @@ from decimal import Decimal
 from datetime import datetime, timedelta
 from django.contrib.auth.decorators import login_required
 # Linha CORRIGIDA para colocar no seu views.py
-
+from django.db.models.functions import Replace
+from django.db.models import Value, F, Q
 from .models import Lavagem, Base, TipoLavagem
 @login_required
 def dashboard(request):
-    search_query = request.GET.get("search", "")
+    # Remove hífens da pesquisa do usuário
+    search_query = request.GET.get("search", "").replace("-", "")
     status_filter = request.GET.get("status", "")
-    
+
     lavagens = Lavagem.objects.prefetch_related(
         "lavadores"
     ).select_related("cliente")
-    
+
+    # 🔍 Permite buscar "TESTE" e encontrar "TES-TE"
     if search_query:
-        lavagens = lavagens.filter(
+        lavagens = lavagens.annotate(
+            placa_sem_hifen=Replace(F('placa_veiculo'), Value('-'), Value(''))
+        ).filter(
             Q(codigo__icontains=search_query) |
-            Q(placa_veiculo__icontains=search_query) |
+            Q(placa_sem_hifen__icontains=search_query) |
             Q(cliente__nome__icontains=search_query) |
             Q(lavadores__nome__icontains=search_query)
-        ).distinct() # .distinct() evita resultados duplicados na busca ManyToMany
-    
+        ).distinct()
+
     if status_filter:
         lavagens = lavagens.filter(status=status_filter)
-    
+
     lavagens_andamento = lavagens.filter(status="EM_ANDAMENTO").order_by("-hora_inicio")
     lavagens_concluidas = lavagens.filter(status="CONCLUIDA").order_by("-data_lavagem", "-hora_termino")
-    
+
     paginator_andamento = Paginator(lavagens_andamento, 10)
     paginator_concluidas = Paginator(lavagens_concluidas, 20)
-    
+
     page_andamento = request.GET.get("page_andamento", 1)
     page_concluidas = request.GET.get("page_concluidas", 1)
-    
+
     lavagens_andamento = paginator_andamento.get_page(page_andamento)
     lavagens_concluidas = paginator_concluidas.get_page(page_concluidas)
-    
+
     context = {
         "lavagens_andamento": lavagens_andamento,
         "lavagens_concluidas": lavagens_concluidas,
-        "search_query": search_query,
+        "search_query": request.GET.get("search", ""),  # Mantém o texto original no campo de busca
         "status_filter": status_filter,
         "total_andamento": lavagens.filter(status="EM_ANDAMENTO").count(),
         "total_concluidas": lavagens.filter(status="CONCLUIDA").count(),
     }
-    
+
     return render(request, "lavagens/dashboard.html", context)
+
 
 @login_required
 def nova_lavagem(request):
