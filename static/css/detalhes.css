@@ -1,0 +1,119 @@
+/* lavajato2025/static/css/detalhes.css */
+
+/* --- Campos de Visualização --- */
+.detail-group {
+    margin-bottom: 1.25rem;
+}
+
+.detail-label {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.detail-value {
+    color: var(--text-light);
+    font-size: 1rem;
+    font-weight: 500;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+}
+
+.detail-value.highlight {
+    border-color: var(--primary-color);
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* --- Card de Status (Lateral) --- */
+.status-timeline {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-top: 1rem;
+}
+
+.status-timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--border-color);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--card-bg);
+    border: 2px solid var(--text-muted);
+    position: absolute;
+    left: -1.5rem;
+    top: 4px;
+    z-index: 2;
+}
+
+.timeline-item.active .timeline-dot {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+.timeline-content h6 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.timeline-content small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+/* --- Botões de Ação Grandes --- */
+.action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-action-lg {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    color: var(--text-light);
+    transition: all 0.2s;
+}
+
+.btn-action-lg:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary-color);
+    background-color: var(--hover-bg);
+    color: var(--primary-color);
+}
+
+.btn-action-lg i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.text-light{
+    color: var(--text-light) !important;
+}

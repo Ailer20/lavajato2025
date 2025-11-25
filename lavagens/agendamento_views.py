@@ -292,9 +292,10 @@ def api_verificar_disponibilidade(request):
 # ViewSet para API REST
 class AgendamentoViewSet(viewsets.ModelViewSet):
     queryset = Agendamento.objects.select_related(
-        "cliente", "veiculo", "lavador"
+        "cliente", "veiculo", "base", "tipo_lavagem"
+    ).prefetch_related(
+        "lavadores" 
     ).all()
-    permission_classes = [IsAuthenticated]
     
     def get_serializer_class(self):
         if self.action == "list":

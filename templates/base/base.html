@@ -6,189 +6,216 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Lava Jato 2025{% endblock %}</title>
     
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">       <!-- 1. Cérebro (Variáveis ) -->
-    <link rel="stylesheet" href="{% static 'css/components.css' %}"> <!-- 2. Componentes -->
-    <link rel="stylesheet" href="{% static 'css/pages.css' %}">      <!-- 3. Páginas Específicas -->
+    <link rel="icon" href="https://encrypted-tbn2.gstatic.com/faviconV2?url=https://www.nortetech.net&amp;client=VFE&amp;size=64&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;nfrp=2" type="image/png">
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pages.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout_sistematico.css' %}">
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'dashboard' %}">
-                <i class="fas fa-car-wash me-2"></i>
-                LAVA JATO 2025
+
+    <aside class="sidebar" id="sidebar">
+        
+        <div class="sidebar-header">
+            <a href="{% url 'dashboard' %}" class="sidebar-brand text-decoration-none">
+                <span class="logo-expanded">
+                    <i class="fas fa-car-wash text-primary me-2"></i>
+                    <span class="brand-text">LAVA JATO 2025</span>
+                </span>
+
+                <img src="https://encrypted-tbn2.gstatic.com/faviconV2?url=https://www.nortetech.net&amp;client=VFE&amp;size=64&amp;type=FAVICON&amp;fallback_opts=TYPE,SIZE,URL&amp;nfrp=2" 
+                    alt="Norte Tech" 
+                    class="logo-collapsed">
             </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard' %}">
-                            <i class="fas fa-tachometer-alt me-1"></i>
-                            Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'agendamentos_dashboard' %}">
-                            <i class="fas fa-calendar-alt me-1"></i>
-                            Agendamentos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'relatorios' %}">
-                            <i class="fas fa-chart-bar me-1"></i>
-                            Relatórios
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownCadastros" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-database me-1"></i>
-                            Cadastros
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownCadastros">
-                            <li><a class="dropdown-item" href="{% url 'cliente_list' %}">Contrato/Setor</a></li>
-                            <li><a class="dropdown-item" href="{% url 'lavador_list' %}">Lavadores</a></li>
-                            <li><a class="dropdown-item" href="{% url 'veiculo_list' %}">Veículos</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'base_list' %}">Bases</a></li>
-                            <li><a class="dropdown-item" href="{% url 'tipo_lavagem_list' %}">Tipos de Lavagem</a></li>
-                            <li><a class="dropdown-item" href="{% url 'transporte_equipamento_list' %}">Transportes/Equipamentos</a></li>
-                        </ul>
-                    </li>
-                </ul>
-                <!-- Seção de Troca de Tema -->
-                <div class="d-flex align-items-center">
-                    <button class="btn btn-outline-secondary me-2" id="theme-switcher">
+        </div>
+
+        <div class="sidebar-content custom-scrollbar">
+            <nav class="sidebar-menu mt-3">
+                <div class="menu-label">Operacional</div>
+                <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
+                </a>
+                <a href="{% url 'agendamentos_dashboard' %}" class="nav-link {% if 'agendamento' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-calendar-check"></i><span>Agendamentos</span>
+                </a>
+                <a href="{% url 'relatorios' %}" class="nav-link {% if 'relatorios' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-chart-pie"></i><span>Relatórios</span>
+                </a>
+
+                <div class="menu-label mt-4">Gestão de Recursos</div>
+                
+                <a href="{% url 'nota_fiscal_lista' %}" class="nav-link {% if 'nota' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-file-invoice-dollar"></i><span>Notas Fiscais (Entrada)</span>
+                </a>
+                
+                <a href="{% url 'estoque_lista' %}" class="nav-link {% if 'estoque_lista' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-boxes"></i><span>Catálogo de Estoque</span>
+                </a>
+
+                <a href="{% url 'saida_estoque' %}" class="nav-link {% if 'saida' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-dolly"></i><span>Registrar Saída / Entrega</span>
+                </a>
+
+                <div class="menu-label mt-4 text-warning">Minha Área</div>
+                <a href="{% url 'meu_estoque_pessoal' %}" class="nav-link {% if 'meu_estoque' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-tools"></i><span>Meus Materiais</span>
+                </a>
+
+                <div class="menu-label mt-4">Cadastros Gerais</div>
+                <a href="{% url 'lavador_list' %}" class="nav-link {% if 'lavador' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-users"></i><span>Colaboradores (RH)</span>
+                </a>
+                <a href="{% url 'cliente_list' %}" class="nav-link {% if 'cliente' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-user-tie"></i><span>Clientes</span>
+                </a>
+                <a href="{% url 'veiculo_list' %}" class="nav-link {% if 'veiculo' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-car"></i><span>Veículos</span>
+                </a>
+
+                <a class="nav-link collapsed mt-2" href="#submenuConfig" data-bs-toggle="collapse">
+                    <i class="fas fa-cogs"></i><span>Configurações</span><i class="fas fa-chevron-down ms-auto arrow"></i>
+                </a>
+                <div class="collapse" id="submenuConfig">
+                    <div class="bg-dark-soft rounded mx-2 mt-1 p-2">
+                        <a href="{% url 'tipo_lavagem_list' %}" class="nav-link-sm">Serviços</a>
+                        <a href="{% url 'transporte_equipamento_list' %}" class="nav-link-sm">Transportes</a>
+                        <a href="{% url 'base_list' %}" class="nav-link-sm">Bases</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <div class="main-wrapper" id="main-wrapper">
+        <header class="top-navbar">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <button class="btn btn-link text-light" id="sidebar-toggle"><i class="fas fa-bars fa-lg"></i></button>
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn btn-icon-only" id="theme-switcher" title="Alternar Tema">
                         <i class="fas fa-sun" id="theme-icon-sun" style="display: none;"></i>
                         <i class="fas fa-moon" id="theme-icon-moon"></i>
                     </button>
-                </div>
-
-                <!-- Seção de Usuário Dinâmica -->
-                <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
-                        <!-- O usuário está logado -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle me-1"></i>
-                                {{ user.username }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
-                                <li><a class="dropdown-item" href="{% url 'meu_perfil' %}">Meu Perfil</a></li>
-                                
-                                {% if user.is_superuser %}
-                                    <!-- Só mostra o link do Admin se for superusuário -->
-                                    <li><a class="dropdown-item" href="/admin/">Admin</a></li>
-                                {% endif %}
-                                
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-decoration-none text-light dropdown-toggle" data-bs-toggle="dropdown">
+                            <div class="avatar-circle bg-primary me-2">
+                                {% if user.is_authenticated %}{{ user.username|first|upper }}{% else %}<i class="fas fa-user"></i>{% endif %}
+                            </div>
+                            <div class="d-none d-md-block text-end me-1">
+                                <div class="fw-bold small">{{ user.username|default:"Visitante" }}</div>
+                                <div class="text-muted x-small">Admin</div>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow mt-2">
+                            {% if user.is_authenticated %}
+                                <li><a class="dropdown-item" href="{% url 'meu_perfil' %}"><i class="fas fa-user-circle me-2"></i> Meu Perfil</a></li>
+                                {% if user.is_superuser %}<li><a class="dropdown-item" href="/admin/"><i class="fas fa-shield-alt me-2"></i> Admin Django</a></li>{% endif %}
                                 <li><hr class="dropdown-divider"></li>
-                                
-                                <li>
-                                    <form method="post" action="{% url 'logout' %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="dropdown-item text-danger" style="border: none; background: none; width: 100%; text-align: left;">
-                                            <i class="fas fa-sign-out-alt me-1"></i>
-                                            Sair
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <!-- O usuário NÃO está logado -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">
-                                <i class="fas fa-sign-in-alt me-1"></i>
-                                Entrar
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <main class="container mt-4">
-        <!-- Messages -->
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
-                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                <li><form method="post" action="{% url 'logout' %}" class="px-2">{% csrf_token %}<button type="submit" class="btn btn-danger btn-sm w-100"><i class="fas fa-sign-out-alt me-2"></i>Sair</button></form></li>
+                            {% else %}
+                                <li><a class="dropdown-item" href="{% url 'login' %}">Entrar</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
                 </div>
-            {% endfor %}
-        {% endif %}
+            </div>
+        </header>
 
-        {% block content %}{% endblock %}
-    </main>
+        <main class="page-content">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm mb-4">
+                        <i class="fas fa-info-circle me-2"></i> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
 
-    <!-- Bootstrap JS -->
+        <footer class="footer mt-auto py-3 text-center text-muted small">
+            &copy; 2025 Lava Jato System - Versão 2.0
+        </footer>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    <!-- Bloco para scripts específicos de cada página -->
+    <script>
+        $(document).ready(function() {
+            // Aplica Select2 em todos os <select> que NÃO tenham a classe 'no-select2'
+            $('select:not(.no-select2)').each(function() {
+                $(this).select2({
+                    theme: 'bootstrap-5',
+                    width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+                    placeholder: $(this).data('placeholder') || "Selecione...",
+                    allowClear: true,
+                    language: {
+                        noResults: function() { return "Nenhum resultado encontrado"; },
+                        searching: function() { return "Buscando..."; }
+                    }
+                });
+            });
+        });
+    </script>
+
     {% block extra_js %}{% endblock %}
 
-    <!-- ===== SCRIPT DE TROCA DE TEMA (EXECUTADO EM TODAS AS PÁGINAS ) ===== -->
     <script>
-    (function() {
-        // Usamos uma função auto-executável para evitar poluir o escopo global
-
-        const themeSwitcher = document.getElementById('theme-switcher');
-        const body = document.body;
-        const iconSun = document.getElementById('theme-icon-sun');
-        const iconMoon = document.getElementById('theme-icon-moon');
-
-        // Se algum dos elementos não for encontrado, interrompe o script para evitar erros
-        if (!themeSwitcher || !body || !iconSun || !iconMoon) {
-            console.error("Elementos do seletor de tema não encontrados.");
-            return;
-        }
-
-        // Função para aplicar o tema
-        const applyTheme = (theme) => {
-            if (theme === 'light') {
-                body.classList.add('light-theme');
-                iconSun.style.display = 'inline-block';
-                iconMoon.style.display = 'none';
-            } else {
-                body.classList.remove('light-theme');
-                iconSun.style.display = 'none';
-                iconMoon.style.display = 'inline-block';
-            }
-        };
-
-        // Carregar o tema salvo ao iniciar a página
-        const savedTheme = localStorage.getItem('theme') || 'dark'; // Padrão é 'dark'
-        applyTheme(savedTheme);
-
-        // Adicionar o evento de clique no botão
-        themeSwitcher.addEventListener('click', function() {
-            // Verifica qual é o tema atual pela classe no body
-            const isLightTheme = body.classList.contains('light-theme');
-            const newTheme = isLightTheme ? 'dark' : 'light';
-            
-            // Aplica o novo tema
-            applyTheme(newTheme);
-            
-            // Salva a preferência no localStorage
-            localStorage.setItem('theme', newTheme);
+        // Scripts de Layout e Tema
+        document.getElementById('sidebar-toggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('main-wrapper').classList.toggle('expanded');
         });
-    })();
+
+        (function() {
+            const themeSwitcher = document.getElementById('theme-switcher');
+            const body = document.body;
+            const iconSun = document.getElementById('theme-icon-sun');
+            const iconMoon = document.getElementById('theme-icon-moon');
+
+            if (!themeSwitcher) return;
+
+            const applyTheme = (theme) => {
+                if (theme === 'light') {
+                    body.classList.add('light-theme');
+                    // Atualiza atributo do Bootstrap se necessário (opcional)
+                    document.documentElement.setAttribute('data-bs-theme', 'light');
+                    
+                    // Ícones: No tema claro, mostramos a LUA (para ir pro escuro)
+                    if(iconSun) iconSun.style.display = 'none';
+                    if(iconMoon) iconMoon.style.display = 'inline-block';
+                } else {
+                    body.classList.remove('light-theme');
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                    
+                    // Ícones: No tema escuro, mostramos o SOL (para ir pro claro)
+                    if(iconSun) iconSun.style.display = 'inline-block';
+                    if(iconMoon) iconMoon.style.display = 'none';
+                }
+            };
+
+            // Carrega tema salvo ou usa 'dark' por padrão
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            applyTheme(savedTheme);
+
+            themeSwitcher.addEventListener('click', function() {
+                const isLight = body.classList.contains('light-theme');
+                const newTheme = isLight ? 'dark' : 'light';
+                applyTheme(newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+        })();
     </script>
 </body>
 </html>

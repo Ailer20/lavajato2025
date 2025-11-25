@@ -1,0 +1,135 @@
+/* lavajato2025/static/css/dashboard.css */
+
+/* --- Layout Geral --- */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* --- Cards de KPI (Indicadores no Topo) --- */
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+.kpi-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Barra lateral colorida no KPI */
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+}
+
+.kpi-primary::before { background-color: var(--primary-color); }
+.kpi-success::before { background-color: var(--success-color); }
+.kpi-warning::before { background-color: #f59e0b; } /* Laranja */
+
+.kpi-content h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-light);
+    line-height: 1;
+}
+
+.kpi-content p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+}
+
+.kpi-icon {
+    font-size: 2.5rem;
+    opacity: 0.2;
+    color: var(--text-light);
+}
+
+/* --- Barra de Filtros --- */
+.filter-bar {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 1rem;
+    box-shadow: var(--shadow-sm);
+}
+
+/* --- Seção "Em Andamento" (Destaque) --- */
+.active-wash-card {
+    border-left: 4px solid #f59e0b; /* Laranja para chamar atenção */
+}
+
+.time-badge {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* --- Tabelas --- */
+.table-responsive {
+    border-radius: 0.75rem;
+    overflow: hidden; /* Arredonda cantos da tabela */
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--hover-bg);
+    cursor: pointer;
+}
+
+/* Badges de Status Específicos do Dashboard */
+.status-dot {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.dot-warning { background-color: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+.dot-success { background-color: var(--success-color); }
+.dot-danger { background-color: #ef4444; }
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-bar > * {
+        width: 100%;
+    }
+}

@@ -1,0 +1,174 @@
+/* lavajato2025/static/css/agendamentos.css */
+
+/* --- Container Principal --- */
+.agendamentos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* --- Cards de Estatísticas (KPIs) --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Faixa colorida lateral */
+.stat-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+}
+
+.stat-primary::before { background-color: var(--primary-color); }
+.stat-info::before { background-color: #06b6d4; } /* Ciano */
+.stat-success::before { background-color: var(--success-color); }
+.stat-danger::before { background-color: #ef4444; }
+
+.stat-content h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-light);
+    line-height: 1;
+}
+
+.stat-content p {
+    margin: 0;
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background-color: var(--hover-bg); /* Fundo sutil */
+}
+
+.stat-primary .stat-icon { color: var(--primary-color); }
+.stat-info .stat-icon { color: #06b6d4; }
+.stat-success .stat-icon { color: var(--success-color); }
+.stat-danger .stat-icon { color: #ef4444; }
+
+/* --- Barra de Filtros --- */
+.filter-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+}
+
+/* --- Tabela e Listagem --- */
+.table-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    overflow: hidden; /* Arredonda cantos da tabela */
+    box-shadow: var(--shadow-sm);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Badges de Status Modernos (com pontinho) */
+.status-badge-modern {
+    padding: 0.35em 0.8em;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid transparent;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Variações de Status */
+.status-agendado {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border-color: rgba(59, 130, 246, 0.2);
+}
+.status-agendado .status-dot { background-color: #3b82f6; }
+
+.status-confirmado {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+.status-confirmado .status-dot { background-color: #10b981; }
+
+.status-vencido {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+.status-vencido .status-dot { background-color: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+
+/* Prioridades */
+.priority-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+.priority-alta { color: #f59e0b; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); }
+.priority-urgente { color: #ef4444; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); }
+
+/* Botões de Ação na Tabela */
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+.btn-icon:hover { transform: translateY(-2px); }
+.btn-view { color: #06b6d4; background: rgba(6, 182, 212, 0.1); }
+.btn-confirm { color: #10b981; background: rgba(16, 185, 129, 0.1); }
+.btn-play { color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+.btn-cancel { color: #ef4444; background: rgba(239, 68, 68, 0.1); }

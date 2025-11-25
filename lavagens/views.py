@@ -72,35 +72,59 @@ def dashboard(request):
 def nova_lavagem(request):
     if request.method == "POST":
         try:
-            # --- CAPTURANDO DADOS COM OS NOMES CORRETOS DO HTML ---
+            # 1. Captura dos dados
             placa_veiculo = request.POST.get("placa_veiculo")
+            
+            # Captura o ID do dropdown (onde você seleciona "COMUNICAÇÃO")
+            cliente_id = request.POST.get("cliente") 
+            
             base_id = request.POST.get("base")
-            local = request.POST.get("local") # <-- CORRIGIDO: Agora busca "local"
-            tipo_lavagem_id = request.POST.get("tipo_lavagem") # <-- CORRIGIDO: Agora busca "tipo_lavagem"
-            transporte_id = request.POST.get("transporte_equipamento") # <-- CORRIGIDO: Agora busca "transporte_equipamento"
+            local = request.POST.get("local")
+            tipo_lavagem_id = request.POST.get("tipo_lavagem")
+            transporte_id = request.POST.get("transporte_equipamento")
             lavadores_ids = request.POST.getlist("lavadores") 
             hora_inicio_str = request.POST.get("hora_inicio")
             observacoes = request.POST.get("observacoes", "")
-            contrato = request.POST.get("contrato", "")
+            
+            # Captura o que foi digitado manualmente (se houver)
+            contrato_manual = request.POST.get("contrato", "") 
+            
             valor_servico_str = request.POST.get("valor_servico")
 
-            # --- VALIDAÇÃO (agora usando os nomes corretos) ---
+            # 2. Validação
             if not all([placa_veiculo, base_id, local, tipo_lavagem_id, transporte_id, hora_inicio_str]):
-                messages.error(request, "Todos os campos com * devem ser preenchidos.")
+                messages.error(request, "Todos os campos obrigatórios (*) devem ser preenchidos.")
                 return redirect("nova_lavagem")
 
-            # --- CONVERSÃO E BUSCA DE OBJETOS ---
+            # 3. Conversão e Buscas
             hora_inicio_obj = datetime.strptime(hora_inicio_str, '%Y-%m-%dT%H:%M')
             data_lavagem_obj = hora_inicio_obj.date()
             valor_servico = Decimal(valor_servico_str) if valor_servico_str else Decimal('0.00')
             
             base = get_object_or_404(Base, id=base_id)
-            tipo_lavagem = get_object_or_404(TipoLavagem, id=tipo_lavagem_id) # Usará o ID correto
-            transporte_equipamento = get_object_or_404(TransporteEquipamento, id=transporte_id) # Usará o ID correto
+            tipo_lavagem = get_object_or_404(TipoLavagem, id=tipo_lavagem_id)
+            transporte_equipamento = get_object_or_404(TransporteEquipamento, id=transporte_id)
 
-            # --- CRIAÇÃO DO OBJETO LAVAGEM ---
+            # --- LÓGICA DE CONTRATO/SETOR ---
+            # Se selecionou algo no dropdown, pegamos o NOME e salvamos no campo contrato
+            valor_para_contrato = contrato_manual # Começa com o que foi digitado (se houver)
+            
+            cliente_obj = None
+            if cliente_id:
+                try:
+                    cliente_obj = Cliente.objects.get(id=cliente_id)
+                    # AQUI ESTÁ O TRUQUE: Copiamos o nome "COMUNICAÇÃO" para o campo contrato
+                    if not valor_para_contrato: 
+                        valor_para_contrato = cliente_obj.nome 
+                except Cliente.DoesNotExist:
+                    pass
+
+            # 4. Criação
             lavagem = Lavagem.objects.create(
                 placa_veiculo=placa_veiculo.upper(),
+                # Podemos deixar cliente como None se você preferir, ou salvar ambos.
+                # Vou salvar ambos para segurança, mas o contrato terá o texto que você quer.
+                cliente=cliente_obj, 
                 base=base,
                 local=local,
                 tipo_lavagem=tipo_lavagem,
@@ -109,22 +133,26 @@ def nova_lavagem(request):
                 hora_termino=None,
                 data_lavagem=data_lavagem_obj,
                 observacoes=observacoes,
-                contrato=contrato,
+                
+                # AQUI SALVAMOS O NOME DO SETOR NO CAMPO CONTRATO
+                contrato=valor_para_contrato, 
+                
                 valor_servico=valor_servico,
             )
+            
             if lavadores_ids:
-                # O método .set() espera uma lista de IDs e cuida de criar as relações
                 lavagem.lavadores.set(lavadores_ids)
 
-
-            messages.success(request, f"Lavagem {lavagem.codigo} criada com sucesso!")
+            messages.success(request, f"Lavagem {lavagem.codigo} iniciada com sucesso!")
             return redirect("dashboard")
             
         except Exception as e:
             messages.error(request, f"Erro ao criar lavagem: {str(e)}")
             return redirect("nova_lavagem")
     
+    # GET
     context = {
+        "clientes": Cliente.objects.filter(ativo=True).order_by('nome'),
         "lavadores": Lavador.objects.filter(ativo=True),
         "tipos_lavagem": TipoLavagem.objects.all(),
         "bases": Base.objects.all(),
@@ -434,9 +462,15 @@ def base_delete(request, pk):
         return redirect('base_list')
     return render(request, 'lavagens/base_confirm_delete.html', {'base': base})
 
+
+
 @login_required
 def tipo_lavagem_list(request):
-    tipos_lavagem = TipoLavagem.objects.all()
+    # Adicionamos .annotate() para contar os materiais e .order_by() para organizar
+    tipos_lavagem = TipoLavagem.objects.annotate(
+        qtd_materiais=Count('materiais')
+    ).order_by('nome')
+    
     return render(request, 'lavagens/tipo_lavagem_list.html', {'tipos_lavagem': tipos_lavagem})
 
 @login_required

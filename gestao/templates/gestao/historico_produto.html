@@ -1,0 +1,74 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex align-items-center mb-4">
+        <a href="{% url 'estoque_lista' %}" class="btn btn-outline-secondary me-3">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="mb-0">{{ produto.nome }}</h2>
+            <p class="text-muted mb-0">Histórico de Movimentações (Kardex)</p>
+        </div>
+        <div class="ms-auto text-end">
+            <div class="badge bg-primary fs-5">Saldo Atual: {{ produto.quantidade_atual }} {{ produto.unidade_medida }}</div>
+            <div class="small text-muted mt-1">Local: {{ produto.localizacao|default:"Não definido" }}</div>
+        </div>
+    </div>
+
+    <div class="card-custom">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>Tipo</th>
+                        <th>Qtd</th>
+                        <th>Saldo Anterior</th>
+                        <th>Saldo Final</th>
+                        <th>Responsável / Origem</th>
+                        <th>Observação</th>
+                        <th>Usuário Sistema</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mov in movimentacoes %}
+                    <tr>
+                        <td>{{ mov.data_movimento|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            {% if mov.tipo == 'ENTRADA' %}
+                                <span class="text-success fw-bold"><i class="fas fa-arrow-up"></i> Entrada</span>
+                            {% elif mov.tipo == 'SAIDA' %}
+                                <span class="text-warning fw-bold"><i class="fas fa-arrow-down"></i> Saída</span>
+                            {% elif mov.tipo == 'DEVOLUCAO' %}
+                                <span class="text-info fw-bold"><i class="fas fa-undo"></i> Devolução</span>
+                            {% else %}
+                                <span class="text-danger fw-bold">Ajuste</span>
+                            {% endif %}
+                        </td>
+                        <td class="fw-bold">{{ mov.quantidade }}</td>
+                        <td class="text-muted">{{ mov.saldo_anterior }}</td>
+                        <td>{{ mov.saldo_atual }}</td>
+                        <td>
+                            {% if mov.responsavel %}
+                                <i class="fas fa-user me-1"></i> {{ mov.responsavel.nome }}
+                            {% elif mov.nota_fiscal %}
+                                <i class="fas fa-file-invoice me-1"></i> {{ mov.nota_fiscal }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ mov.observacao }}</td>
+                        <td><small>{{ mov.usuario_sistema.username }}</small></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">Nenhuma movimentação registrada.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

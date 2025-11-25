@@ -1,37 +1,70 @@
 {% extends 'base/base.html' %}
+{% load static %}
 
-{% block title %}Bases{% endblock %}
+{% block title %}Bases - Lava Jato 2025{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Lista de Bases</h2>
-    <a href="{% url 'base_create' %}" class="btn btn-primary mb-3">Adicionar Nova Base</a>
-    <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for base in bases %}
-                <tr>
-                    <td>{{ base.nome }}</td>
-                    <td>
-                        <a href="{% url 'base_update' base.pk %}" class="btn btn-sm btn-info">Editar</a>
-                        <a href="{% url 'base_delete' base.pk %}" class="btn btn-sm btn-danger">Excluir</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="2">Nenhuma base cadastrada.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div class="container-fluid fade-in">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold" style="color: var(--text-light);">
+                <i class="fas fa-map-marker-alt me-2 text-primary"></i>Bases Operacionais
+            </h2>
+            <p class="text-muted mb-0">Gerencie os locais de atendimento</p>
+        </div>
+        <a href="{% url 'base_create' %}" class="btn btn-success-custom">
+            <i class="fas fa-plus me-2"></i>Nova Base
+        </a>
+    </div>
+
+    <div class="card-custom">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="background-color: var(--card-header-bg); border-bottom: 1px solid var(--border-color);">
+                        <tr>
+                            <th class="ps-4">Nome / Identificação</th>
+                            <th class="text-end pe-4">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for base in bases %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold fs-5">{{ base.nome }}</div>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <a href="{% url 'base_update' base.pk %}" class="btn btn-sm btn-outline-info" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'base_delete' base.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center py-5">
+                                <div class="text-muted opacity-50 mb-3">
+                                    <i class="fas fa-map-signs fa-3x"></i>
+                                </div>
+                                <h5 class="text-muted">Nenhuma base cadastrada</h5>
+                                <p class="text-muted small">Clique no botão "Nova Base" para começar.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
-
-

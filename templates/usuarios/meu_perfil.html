@@ -1,51 +1,100 @@
 {% extends 'base/base.html' %}
+{% load static %}
 
 {% block title %}Meu Perfil - {{ user.username }}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <h2 class="mb-4">Meu Perfil</h2>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <div class="mb-4">
+                <h2 class="mb-0 fw-bold" style="color: var(--text-light);">
+                    <i class="fas fa-user-circle me-2 text-primary"></i>Meu Perfil
+                </h2>
+                <p class="text-muted">Gerencie suas informações e segurança</p>
+            </div>
 
-        <!-- Card de Informações do Perfil -->
-        <div class="card-custom mb-4">
-            <div class="card-header-custom">
-                <h5 class="mb-0">Informações do Perfil</h5>
-            </div>
-            <div class="card-body">
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label-custom">Nome</label>
-                            {{ user_form.first_name }}
+            <div class="card-custom mb-4">
+                <div class="card-header-custom">
+                    <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>Dados Pessoais</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nome</label>
+                                {{ user_form.first_name }}
+                                <div class="text-danger small">{{ user_form.first_name.errors }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Sobrenome</label>
+                                {{ user_form.last_name }}
+                                <div class="text-danger small">{{ user_form.last_name.errors }}</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">E-mail</label>
+                                {{ user_form.email }}
+                                <div class="text-danger small">{{ user_form.email.errors }}</div>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label-custom">Sobrenome</label>
-                            {{ user_form.last_name }}
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label-custom">E-mail</label>
-                        {{ user_form.email }}
-                    </div>
-                    <button type="submit" class="btn btn-primary-custom">Salvar Alterações</button>
-                </form>
-            </div>
-        </div>
 
-        <!-- Card de Alteração de Senha -->
-        <div class="card-custom">
-            <div class="card-header-custom">
-                <h5 class="mb-0">Alterar Senha</h5>
+                        <div class="mt-4 d-flex justify-content-end">
+                            <button type="submit" class="btn btn-success-custom">
+                                <i class="fas fa-save me-2"></i> Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="card-body">
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    {{ password_form.as_p }}
-                    <button type="submit" name="change_password" class="btn btn-danger-custom">Alterar Senha</button>
-                </form>
+
+            <div class="card-custom border-danger" style="border: 1px solid rgba(220, 53, 69, 0.3);">
+                <div class="card-header-custom" style="background-color: rgba(220, 53, 69, 0.1); border-bottom-color: rgba(220, 53, 69, 0.3);">
+                    <h5 class="mb-0 text-danger"><i class="fas fa-key me-2"></i>Segurança</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Senha Atual</label>
+                            {{ password_form.old_password }}
+                            <div class="text-danger small">{{ password_form.old_password.errors }}</div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nova Senha</label>
+                                {{ password_form.new_password1 }}
+                                {% if password_form.new_password1.help_text %}
+                                    <div class="form-text small text-muted">{{ password_form.new_password1.help_text|safe }}</div>
+                                {% endif %}
+                                <div class="text-danger small">{{ password_form.new_password1.errors }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Confirmar Nova Senha</label>
+                                {{ password_form.new_password2 }}
+                                <div class="text-danger small">{{ password_form.new_password2.errors }}</div>
+                            </div>
+                        </div>
+                        
+                        {% if password_form.non_field_errors %}
+                            <div class="alert alert-danger small">
+                                {{ password_form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" name="change_password" class="btn btn-danger">
+                                <i class="fas fa-lock me-2"></i> Alterar Senha
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
+
         </div>
     </div>
 </div>

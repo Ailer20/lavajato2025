@@ -1,0 +1,56 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-file-invoice-dollar me-2"></i>Notas Fiscais (Entrada)</h2>
+        <a href="{% url 'nota_fiscal_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Lançar Nova Nota
+        </a>
+    </div>
+
+    <div class="card-custom">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nº Nota</th>
+                        <th>Fornecedor</th>
+                        <th>Emissão</th>
+                        <th>Vencimento</th>
+                        <th>Valor Total</th>
+                        <th>Arquivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for nota in notas %}
+                    <tr>
+                        <td class="fw-bold">{{ nota.numero_nota }}</td>
+                        <td>
+                            <div>{{ nota.razao_social }}</div>
+                            <small class="text-muted">{{ nota.cnpj_fornecedor }}</small>
+                        </td>
+                        <td>{{ nota.data_emissao|date:"d/m/Y" }}</td>
+                        <td>{{ nota.data_vencimento|date:"d/m/Y" }}</td>
+                        <td class="text-success fw-bold">R$ {{ nota.valor_total_nota }}</td>
+                        <td>
+                            {% if nota.arquivo_pdf %}
+                                <a href="{{ nota.arquivo_pdf.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">Nenhuma nota fiscal registrada.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

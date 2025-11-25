@@ -1,13 +1,10 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 from . import agendamento_views
 
-# Router para API REST
-router = DefaultRouter()
-router.register(r'agendamentos', agendamento_views.AgendamentoViewSet)
+# REMOVA o router e as rotas de API deste arquivo. Deixe apenas as views normais (HTML).
 
 urlpatterns = [
-    # Views Django tradicionais
+    # Views Django tradicionais (Telas HTML)
     path('agendamentos/', agendamento_views.agendamentos_dashboard, name='agendamentos_dashboard'),
     path('agendamentos/novo/', agendamento_views.novo_agendamento, name='novo_agendamento'),
     path('agendamentos/<int:agendamento_id>/', agendamento_views.detalhes_agendamento, name='detalhes_agendamento'),
@@ -16,11 +13,7 @@ urlpatterns = [
     path('agendamentos/<int:agendamento_id>/iniciar-lavagem/', agendamento_views.iniciar_lavagem_agendamento, name='iniciar_lavagem_agendamento'),
     path('agendamentos/calendario/', agendamento_views.calendario_agendamentos, name='calendario_agendamentos'),
     
-    # APIs AJAX
+    # APIs AJAX manuais (usadas nos selects do formulário, mantenha estas se ainda estiver usando jQuery/AJAX direto)
     path('api/locais-por-base/', agendamento_views.api_locais_por_base, name='api_locais_por_base'),
     path('api/verificar-disponibilidade/', agendamento_views.api_verificar_disponibilidade, name='api_verificar_disponibilidade'),
-    
-    # API REST
-    path('api/', include(router.urls)),
 ]
-

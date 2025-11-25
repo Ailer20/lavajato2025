@@ -1,123 +1,272 @@
 {% extends 'base/base.html' %}
 {% load static %}
 
-{% block title %}Detalhes do Agendamento {{ agendamento.codigo }} - Lava Jato 2025{% endblock %}
+{% block title %}Detalhes do Agendamento {{ agendamento.codigo }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/detalhes.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="fade-in">
-    <div class="row justify-content-center">
+<div class="container-fluid fade-in">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-3">
+                <h2 class="mb-0 fw-bold" style="color: var(--text-light);">
+                    Agendamento #{{ agendamento.codigo }}
+                </h2>
+                {% if agendamento.status == 'AGENDADO' %}
+                    <span class="badge bg-primary">Agendado</span>
+                {% elif agendamento.status == 'CONFIRMADO' %}
+                    <span class="badge bg-success">Confirmado</span>
+                {% elif agendamento.status == 'EM_ANDAMENTO' %}
+                    <span class="badge bg-warning text-dark">Em Andamento</span>
+                {% elif agendamento.status == 'CANCELADO' %}
+                    <span class="badge bg-danger">Cancelado</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ agendamento.get_status_display }}</span>
+                {% endif %}
+            </div>
+            <p class="text-muted mb-0 mt-1">
+                Criado em {{ agendamento.created_at|date:"d/m/Y \à\s H:i" }}
+            </p>
+        </div>
+        <a href="{% url 'agendamentos_dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Voltar
+        </a>
+    </div>
+
+    <div class="row">
         <div class="col-lg-8">
-            <div class="card-custom">
-                <div class="card-header-custom d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Detalhes do Agendamento - {{ agendamento.codigo }}
-                    </h4>
-                    <span class="status-badge status-{{ agendamento.status|lower|cut:'_' }}">
-                        {{ agendamento.get_status_display }}
-                    </span>
+            
+            <div class="card-custom mb-4">
+                <div class="card-header-custom">
+                    <h5 class="mb-0"><i class="fas fa-user-tag me-2"></i>Cliente e Veículo</h5>
                 </div>
                 <div class="card-body">
-                    <!-- Informações do Agendamento -->
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Cliente:</label>
-                            {# CORREÇÃO: Removido 'bg-dark', aplicado 'display-field' #}
-                            <div class="display-field">{{ agendamento.cliente.nome }}</div>
+                        <div class="col-md-6 detail-group">
+                            <span class="detail-label">Cliente</span>
+                            <div class="detail-value fw-bold">{{ agendamento.cliente.nome }}</div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Placa do Veículo:</label>
-                            <div class="display-field text-warning">{{ agendamento.placa_veiculo }}</div>
+                        <div class="col-md-6 detail-group">
+                            <span class="detail-label">Veículo / Placa</span>
+                            <div class="detail-value highlight">
+                                <i class="fas fa-car me-2"></i>{{ agendamento.placa_veiculo }} 
+                                <small class="text-muted ms-2">{{ agendamento.veiculo.modelo|default:"" }}</small>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Data e Hora:</label>
-                            <div class="display-field">{{ agendamento.data_hora_agendamento|date:"d/m/Y H:i" }}</div>
+                        <div class="col-md-6 detail-group">
+                            <span class="detail-label">Contato</span>
+                            <div class="detail-value">
+                                {% if agendamento.telefone_contato %}
+                                    <i class="fas fa-phone me-2"></i>{{ agendamento.telefone_contato }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Duração Estimada:</label>
-                            <div class="display-field">{{ agendamento.duracao_estimada }} minutos</div>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <!-- Detalhes do Serviço -->
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Base:</label>
-                            <div class="display-field">{{ agendamento.base }}</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Local:</label>
-                            <div class="display-field">{{ agendamento.local }}</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Tipo de Lavagem:</label>
-                            <div class="display-field">{{ agendamento.tipo_lavagem }}</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Transporte/Equipamento:</label>
-                            <div class="display-field">{{ agendamento.transporte_equipamento }}</div>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <!-- Observações -->
-                    {% if agendamento.observacoes %}
-                    <div class="mb-3">
-                        <label class="form-label">Observações:</label>
-                        <div class="display-field">
-                            {{ agendamento.observacoes|linebreaks }}
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Botões de Ação -->
-                    <div class="mt-4 d-flex justify-content-between">
-                        <a href="{% url 'agendamentos_dashboard' %}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-2"></i>
-                            Voltar
-                        </a>
-                        <div class="btn-group">
-                            {# ... seus botões de ação ... #}
+                         <div class="col-md-6 detail-group">
+                            <span class="detail-label">Email</span>
+                            <div class="detail-value">{{ agendamento.email_contato|default:"-" }}</div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="card-custom mb-4">
+                <div class="card-header-custom">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Dados do Serviço</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 detail-group">
+                            <span class="detail-label">Data e Hora</span>
+                            <div class="detail-value">
+                                <i class="far fa-calendar me-2"></i>{{ agendamento.data_agendamento|date:"d/m/Y" }} 
+                                <i class="far fa-clock ms-3 me-2"></i>{{ agendamento.hora_agendamento|time:"H:i" }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 detail-group">
+                            <span class="detail-label">Duração Estimada</span>
+                            <div class="detail-value">{{ agendamento.duracao_estimada }} min</div>
+                        </div>
+                        <div class="col-md-6 detail-group">
+                            <span class="detail-label">Local</span>
+                            <div class="detail-value">{{ agendamento.base.nome }} - {{ agendamento.local }}</div>
+                        </div>
+                        <div class="col-md-6 detail-group">
+                            <span class="detail-label">Tipo de Lavagem</span>
+                            <div class="detail-value">{{ agendamento.tipo_lavagem.nome }}</div>
+                        </div>
+                         <div class="col-md-6 detail-group">
+                            <span class="detail-label">Equipamento</span>
+                            <div class="detail-value">{{ agendamento.transporte_equipamento.nome }}</div>
+                        </div>
+                         <div class="col-md-6 detail-group">
+                            <span class="detail-label">Equipe (Lavadores)</span>
+                            <div class="detail-value">
+                                {% for lavador in agendamento.lavadores.all %}
+                                    <span class="badge bg-secondary me-1">{{ lavador.nome }}</span>
+                                {% empty %}
+                                    <span class="text-muted">Não definido</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary opacity-25 my-4">
+
+                    <div class="row">
+                         <div class="col-md-4 detail-group">
+                            <span class="detail-label">Valor Estimado</span>
+                            <div class="detail-value text-success fw-bold">
+                                R$ {{ agendamento.valor_estimado|default:"0,00" }}
+                            </div>
+                        </div>
+                         <div class="col-md-8 detail-group">
+                            <span class="detail-label">Observações</span>
+                            <div class="detail-value" style="min-height: 2.5rem;">
+                                {{ agendamento.observacoes|default:"-" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
-        
+
         <div class="col-lg-4">
-            {# ... card de estatísticas ou outras informações ... #}
+            
+            <div class="card-custom mb-4">
+                <div class="card-header-custom bg-primary-subtle">
+                    <h5 class="mb-0 text-primary"><i class="fas fa-bolt me-2"></i>Ações</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if agendamento.status == 'AGENDADO' %}
+                            <form method="POST" action="{% url 'confirmar_agendamento' agendamento.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success w-100 py-2">
+                                    <i class="fas fa-check-circle me-2"></i> Confirmar Agendamento
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        {% if agendamento.pode_iniciar_lavagem %}
+                            <form method="POST" action="{% url 'iniciar_lavagem_agendamento' agendamento.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary w-100 py-2">
+                                    <i class="fas fa-play me-2"></i> Iniciar Lavagem Agora
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+                        {% if agendamento.status == 'EM_ANDAMENTO' and agendamento.lavagem %}
+                             <a href="{% url 'detalhes_lavagem' agendamento.lavagem.id %}" class="btn btn-info text-white w-100 py-2">
+                                <i class="fas fa-eye me-2"></i> Ver Lavagem em Curso
+                            </a>
+                        {% endif %}
+
+                        {% if agendamento.pode_ser_cancelado %}
+                            <button type="button" class="btn btn-outline-danger w-100" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                                <i class="fas fa-times me-2"></i> Cancelar
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Histórico</h5>
+                </div>
+                <div class="card-body">
+                    <div class="status-timeline">
+                        <div class="timeline-item active">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h6>Agendamento Criado</h6>
+                                <small>{{ agendamento.created_at|date:"d/m/Y H:i" }}</small>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item {% if agendamento.confirmado_em %}active{% endif %}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h6>Confirmado</h6>
+                                {% if agendamento.confirmado_em %}
+                                    <small>
+                                        {{ agendamento.confirmado_em|date:"d/m/Y H:i" }} 
+                                        por <strong>{{ agendamento.confirmado_por|default:"Sistema" }}</strong>
+                                    </small>
+                                {% else %}
+                                    <small class="text-muted">Pendente</small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if agendamento.status == 'CANCELADO' %}
+                            <div class="timeline-item active">
+                                <div class="timeline-dot" style="background-color: var(--danger-color); border-color: var(--danger-color);"></div>
+                                <div class="timeline-content">
+                                    <h6 class="text-danger">Cancelado</h6>
+                                    <small>{{ agendamento.cancelado_em|date:"d/m/Y H:i" }}</small>
+                                    <div class="mt-1 p-2 bg-dark-subtle rounded border border-danger small text-danger">
+                                        Motivo: {{ agendamento.motivo_cancelamento }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% elif agendamento.status == 'EM_ANDAMENTO' %}
+                             <div class="timeline-item active">
+                                <div class="timeline-dot" style="background-color: var(--primary-color);"></div>
+                                <div class="timeline-content">
+                                    <h6 class="text-primary">Lavagem Iniciada</h6>
+                                    <small>Em progresso...</small>
+                                </div>
+                            </div>
+                        {% elif agendamento.status == 'CONCLUIDO' %}
+                             <div class="timeline-item active">
+                                <div class="timeline-dot" style="background-color: var(--success-color);"></div>
+                                <div class="timeline-content">
+                                    <h6 class="text-success">Concluído</h6>
+                                    <small>Serviço finalizado</small>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 
-<!-- Modal de cancelamento -->
-{% if agendamento.pode_ser_cancelado %}
 <div class="modal fade" id="cancelModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Cancelar Agendamento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-content" style="background-color: var(--card-bg); color: var(--text-light); border: 1px solid var(--border-color);">
+            <div class="modal-header" style="border-bottom-color: var(--border-color);">
+                <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Cancelar Agendamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1);"></button>
             </div>
             <form method="POST" action="{% url 'cancelar_agendamento' agendamento.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <p>Tem certeza que deseja cancelar o agendamento <strong>{{ agendamento.codigo }}</strong>?</p>
                     <div class="mb-3">
-                        <label class="form-label">Motivo do cancelamento:</label>
-                        <textarea class="form-control" name="motivo" rows="3" placeholder="Digite o motivo..."></textarea>
+                        <label class="form-label">Motivo do cancelamento *</label>
+                        <textarea class="form-control" name="motivo" rows="3" required placeholder="Informe o motivo..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <div class="modal-footer" style="border-top-color: var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
                     <button type="submit" class="btn btn-danger">Confirmar Cancelamento</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-{% endif %}
 {% endblock %}

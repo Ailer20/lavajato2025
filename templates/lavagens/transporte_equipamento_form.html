@@ -8,55 +8,46 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             
-            <!-- Usando o .card-custom para um visual consistente com o tema -->
             <div class="card-custom">
-                <!-- Usando o .card-header-custom para o título -->
                 <div class="card-header-custom">
-                    <h4 class="mb-0">{{ action }}</h4>
+                    <h4 class="mb-0">
+                        <i class="fas fa-truck-pickup me-2"></i>{{ action }}
+                    </h4>
                 </div>
 
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form method="post" novalidate>
                         {% csrf_token %}
                         
-                        <!-- Renderização manual dos campos para controle total do estilo -->
-                        {% for field in form %}
-                            <div class="mb-3">
-                                <!-- A classe .form-label já é estilizada pelo nosso components.css -->
-                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                
-                                <!-- 
-                                O campo em si. A classe .form-control ou .form-select será
-                                adicionada automaticamente pelo FormStyleMixin no seu forms.py.
-                                -->
-                                {{ field }}
-                                
-                                {% if field.help_text %}
-                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Nome / Identificação</label>
+                                {{ form.nome }}
+                                {% if form.nome.errors %}
+                                    <div class="text-danger small">{{ form.nome.errors }}</div>
                                 {% endif %}
-                                
-                                {% for error in field.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {{ error }}
-                                    </div>
-                                {% endfor %}
                             </div>
-                        {% endfor %}
-                        
-                        <hr class="my-4">
 
-                        <!-- Botões alinhados à direita para uma melhor UX -->
-                        <div class="d-flex justify-content-end">
-                            <!-- Botão Cancelar -->
-                            <a href="{% url 'transporte_equipamento_list' %}" class="btn btn-secondary me-2">
-                                <i class="fas fa-times me-1"></i>
+                            <div class="col-md-4">
+                                <label class="form-label">Fator de Preço (x)</label>
+                                {{ form.multiplicador_preco }}
+                                <div class="form-text small text-muted">
+                                    Ex: 1.0 (Normal), 1.5 (Acréscimo de 50%)
+                                </div>
+                                {% if form.multiplicador_preco.errors %}
+                                    <div class="text-danger small">{{ form.multiplicador_preco.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="border-secondary opacity-25 my-4">
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'transporte_equipamento_list' %}" class="btn btn-outline-secondary px-4">
                                 Cancelar
                             </a>
-                            
-                            <!-- Botão Salvar com nosso estilo personalizado -->
-                            <button type="submit" class="btn btn-success-custom">
-                                <i class="fas fa-save me-1"></i>
-                                Salvar
+                            <button type="submit" class="btn btn-success-custom px-4 fw-bold">
+                                <i class="fas fa-check me-2"></i> Salvar
                             </button>
                         </div>
                     </form>

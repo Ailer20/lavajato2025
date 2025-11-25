@@ -21,13 +21,17 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    
+    # API (Centralizada)
+    path("api/", include("lavagens.api_urls")), 
+
+    # Apps
     path("", include("lavagens.urls")),
-    path("api/", include("lavagens.api_urls")),
-    path('', include('lavagens.agendamento_urls')),
+    path('', include('lavagens.agendamento_urls')), # Rotas HTML de agendamento
     path("", include("clientes.urls")),
     path('contas/', include('usuarios.urls')),
+    path('gestao/', include('gestao.urls')),
 ]
-
 # Servir arquivos estáticos e media em desenvolvimento
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

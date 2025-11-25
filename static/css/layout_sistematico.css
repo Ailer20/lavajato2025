@@ -1,0 +1,181 @@
+/* ==========================================================================
+   LAYOUT SISTEMÁTICO (Sidebar & Navbar)
+   ========================================================================== */
+
+:root {
+    --sidebar-width: 260px;
+    --sidebar-width-collapsed: 70px;
+    --header-height: 70px;
+}
+
+/* --- LÓGICA DE TROCA DE LOGO --- */
+
+/* 1. Estado Padrão (Sidebar Aberta) */
+.logo-collapsed {
+    display: none; /* Esconde a imagem da Norte Tech */
+}
+
+.logo-expanded {
+    display: flex;
+    align-items: center;
+    white-space: nowrap; /* Impede que o texto quebre */
+}
+
+/* 2. Estado Colapsado (Sidebar Fechada) */
+.sidebar.collapsed .logo-expanded {
+    display: none; /* Esconde o texto "LAVA JATO 2025" */
+}
+
+.sidebar.collapsed .logo-collapsed {
+    display: block; /* Mostra a imagem da Norte Tech */
+    width: 32px;    /* Tamanho ajustado para caber */
+    height: 32px;
+    margin: 0 auto; /* Centraliza */
+    border-radius: 4px; /* Opcional: borda levemente arredondada */
+}
+
+/* Ajuste fino para centralizar tudo no header quando fechado */
+.sidebar.collapsed .sidebar-brand {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.brand-text {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--text-light);
+}
+
+.sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 0;
+}
+
+.menu-label {
+    padding: 0.75rem 1.5rem 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-muted); /* Cor padrão inativa mais suave */
+    text-decoration: none;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    background-color: var(--hover-bg);
+    color: var(--primary-color);
+}
+
+.nav-link.active {
+    background-color: rgba(59, 130, 246, 0.1); /* Leve azul transparente */
+    color: var(--primary-color);
+    border-left-color: var(--primary-color);
+}
+
+.nav-link i {
+    width: 24px;
+    text-align: center;
+    margin-right: 10px;
+    font-size: 1.1rem;
+}
+
+/* Submenus */
+.nav-link-sm {
+    display: block;
+    padding: 0.5rem 1rem 0.5rem 3.5rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+.nav-link-sm:hover { color: var(--text-light); }
+
+/* --- NAVBAR SUPERIOR --- */
+.main-wrapper {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.3s ease;
+    background-color: var(--background-color);
+}
+.page-content {
+    padding: 2rem;
+    flex: 1;
+}
+.main-wrapper.expanded {
+    margin-left: var(--sidebar-width-collapsed);
+}
+
+.top-navbar {
+    height: var(--header-height);
+    background-color: var(--card-bg); /* Acompanha tema */
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+
+/* Botões redondos (Tema, Toggle) */
+.btn-icon-only {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    background: transparent;
+    transition: 0.2s;
+}
+.btn-icon-only:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background-color: var(--hover-bg);
+}
+
+.avatar-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    font-size: 0.9rem;
+}
+
+/* Sidebar Colapsada */
+.sidebar.collapsed { width: var(--sidebar-width-collapsed); }
+.sidebar.collapsed .brand-text,
+.sidebar.collapsed .menu-label,
+.sidebar.collapsed .nav-link span,
+.sidebar.collapsed .arrow { display: none; }
+.sidebar.collapsed .nav-link { justify-content: center; padding-left: 0; padding-right: 0; }
+.sidebar.collapsed .nav-link i { margin-right: 0; }
+.sidebar.collapsed .sidebar-header { justify-content: center; padding: 0; }
+
+/* Mobile */
+@media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.collapsed { transform: translateX(0); width: var(--sidebar-width); }
+    .sidebar.collapsed .brand-text, .sidebar.collapsed .nav-link span { display: inline; }
+    .main-wrapper { margin-left: 0 !important; }
+}

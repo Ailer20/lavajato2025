@@ -179,10 +179,11 @@ class AgendamentoCalendarioSerializer(serializers.ModelSerializer):
     start = serializers.SerializerMethodField()
     end = serializers.SerializerMethodField()
     color = serializers.SerializerMethodField()
-    
+    extendedProps = serializers.SerializerMethodField() # Campo especial do FullCalendar para dados extras
+
     class Meta:
         model = Agendamento
-        fields = ['id', 'codigo', 'title', 'start', 'end', 'color', 'status']
+        fields = ['id', 'codigo', 'title', 'start', 'end', 'color', 'status', 'url', 'extendedProps']
     
     def get_title(self, obj):
         return f"{obj.placa_veiculo} - {obj.cliente.nome if obj.cliente else 'Cliente não informado'}"
@@ -209,4 +210,15 @@ class AgendamentoCalendarioSerializer(serializers.ModelSerializer):
         }
         return colors.get(obj.status, '#007bff')
 
+    def get_url(self, obj):
+        # Retorna a URL da página de detalhes
+        from django.urls import reverse
+        return reverse('detalhes_agendamento', args=[obj.id])
+
+    def get_extendedProps(self, obj):
+        return {
+            'servico': obj.tipo_lavagem.nome if obj.tipo_lavagem else '-',
+            'local': f"{obj.base.nome} - {obj.local}",
+            'status_display': obj.get_status_display()
+        }
 

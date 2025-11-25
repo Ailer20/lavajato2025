@@ -5,89 +5,207 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/components.css' %}"> <!-- 2. Componentes -->
-    <link rel="stylesheet" href="{% static 'css/pages.css' %}">      <!-- 3. Páginas Específicas -->
-    
-    <!-- Adicionando os arquivos do FullCalendar -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/calendario.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="fade-in">
-    <!-- Header -->
-    <div class="search-container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h2 class="mb-3">
-                    <i class="fas fa-calendar-alt me-2"></i>
-                    Calendário de Agendamentos
-                </h2>
+<div class="container-fluid fade-in">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="mb-1 fw-bold" style="color: var(--text-light);">
+                <i class="far fa-calendar-alt me-2 text-primary"></i>Agenda Visual
+            </h2>
+            <p class="text-muted mb-0">Visualize e gerencie os agendamentos no tempo</p>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <div class="d-none d-md-flex align-items-center gap-3 me-3">
+                <div class="d-flex align-items-center gap-1">
+                    <span class="badge rounded-circle p-1" style="background: #3b82f6;"> </span>
+                    <small class="text-muted">Agendado</small>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                    <span class="badge rounded-circle p-1" style="background: #10b981;"> </span>
+                    <small class="text-muted">Confirmado</small>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                    <span class="badge rounded-circle p-1" style="background: #f59e0b;"> </span>
+                    <small class="text-muted">Em Andamento</small>
+                </div>
             </div>
-            <div class="col-md-4 text-end">
-                <a href="{% url 'novo_agendamento' %}" class="btn btn-success-custom btn-lg">
-                    <i class="fas fa-plus me-2"></i>
-                    Novo Agendamento
+
+            <a href="{% url 'agendamentos_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-list me-2"></i>Visão Lista
+            </a>
+            <a href="{% url 'novo_agendamento' %}" class="btn btn-success-custom">
+                <i class="fas fa-plus me-2"></i>Novo
+            </a>
+        </div>
+    </div>
+
+    <div class="calendar-card">
+        <div id="calendar"></div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--card-bg); color: var(--text-light); border: 1px solid var(--border-color);">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold" id="eventModalTitle">Detalhes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1) grayscale(100%) brightness(200%);"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <div class="d-flex align-items-center mb-3">
+                    <span id="eventStatusBadge" class="badge me-2">STATUS</span>
+                    <span class="text-muted small" id="eventTime">Horário</span>
+                </div>
+                
+                <h4 id="eventCar" class="mb-1 fw-bold text-primary">CARRO</h4>
+                <p id="eventClient" class="text-muted mb-3">CLIENTE</p>
+
+                <div class="bg-dark bg-opacity-25 p-3 rounded mb-3 border border-secondary">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Serviço:</span>
+                        <span class="fw-bold text-light" id="eventService">...</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Local:</span>
+                        <span class="fw-bold text-light" id="eventLocation">...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <a href="#" id="btnViewDetails" class="btn btn-primary w-100">
+                    Ver Detalhes Completos <i class="fas fa-arrow-right ms-2"></i>
                 </a>
             </div>
         </div>
     </div>
-
-    <!-- O contêiner onde o calendário será renderizado -->
-    <div id='calendario'></div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/locales/pt-br.global.min.js'></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const calendarioEl = document.getElementById('calendario');
-    
-    const calendar = new FullCalendar.Calendar(calendarioEl, {
-        initialView: 'dayGridMonth', // Visão inicial (mês)
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-        },
-        locale: 'pt-br', // Traduzir para português
-        buttonText: {
-            today: 'Hoje',
-            month: 'Mês',
-            week: 'Semana',
-            day: 'Dia',
-            list: 'Lista'
-        },
-        events: [
-            // O Django vai gerar os eventos aqui
-            {% for agendamento in agendamentos %}
-            {
-                id: '{{ agendamento.id }}',
-                title: '{{ agendamento.placa_veiculo }} - {{ agendamento.cliente.nome|truncatechars:15 }}',
-                start: '{{ agendamento.data_hora_agendamento|date:"c" }}', // Formato ISO 8601
-                end: '{{ agendamento.get_horario_fim_estimado|date:"c" }}',
-                // Adicionando cores baseadas no status
-                {% if agendamento.status == 'CONFIRMADO' %}
-                    color: '#10b981', // Verde
-                {% elif agendamento.status == 'AGENDADO' %}
-                    color: '#3b82f6', // Azul
-                {% elif agendamento.status == 'CANCELADO' %}
-                    color: '#6b7280', // Cinza
-                    display: 'background',
-                {% endif %}
-                url: '{% url "detalhes_agendamento" agendamento.id %}' // Link para os detalhes
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        
+        // Detecta tema inicial
+        var isDark = !document.body.classList.contains('light-theme');
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'pt-br',
+            themeSystem: 'standard', // Usamos CSS variables para o tema
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listWeek'
             },
-            {% endfor %}
-        ],
-        eventClick: function(info) {
-            // Impede o comportamento padrão do link para abrir na mesma página
-            info.jsEvent.preventDefault(); 
-            if (info.event.url) {
-                window.location.href = info.event.url;
+            buttonText: {
+                today: 'Hoje',
+                month: 'Mês',
+                week: 'Semana',
+                list: 'Lista'
+            },
+            navLinks: true, // clicar no dia/semana leva para a visão
+            editable: false, // Não permitir arrastar (por enquanto, requer backend complexo)
+            dayMaxEvents: true, // "mais..." link quando houver muitos eventos
+            
+            // Fonte de Eventos (API REST)
+            // Isso fará o calendário buscar JSON em /api/agendamentos/calendario/?start=...&end=...
+            events: {
+                url: '/api/agendamentos/calendario/', 
+                failure: function() {
+                    alert('Houve um erro ao carregar os eventos!');
+                }
+            },
+
+            // Renderização customizada do evento (para mostrar placa e cliente)
+            eventContent: function(arg) {
+                let title = arg.event.title; // Já formatado pelo Serializer
+                let statusColor = arg.event.backgroundColor;
+                
+                // Criamos um HTML customizado para a "caixinha" do evento
+                return {
+                    html: `
+                        <div class="d-flex align-items-center overflow-hidden text-nowrap">
+                            <div class="flex-grow-1 fw-bold">${title}</div>
+                        </div>
+                    `
+                }
+            },
+
+            // Ao clicar no evento
+            eventClick: function(info) {
+                info.jsEvent.preventDefault(); // Evita abrir link padrão
+                
+                // Pega dados extras do evento (precisa vir do Serializer ou fazemos outra requisição)
+                // Como seu serializer 'AgendamentoCalendarioSerializer' é simples, 
+                // vamos redirecionar direto ou abrir o modal simples se tiver dados.
+                
+                // Opção Robusta: Redirecionar direto para detalhes
+                if (info.event.url) {
+                   // window.location.href = info.event.url;
+                }
+                
+                // Vamos tentar popular o modal com o que temos
+                // O ID do evento no calendário é o ID do agendamento
+                const eventId = info.event.id;
+                
+                // Abre o modal
+                const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                
+                // Atualiza dados do modal (Título e Link)
+                document.getElementById('eventModalTitle').textContent = 'Agendamento #' + eventId;
+                
+                // Split do título "ABC-1234 - Cliente"
+                let titleParts = info.event.title.split(' - ');
+                let placa = titleParts[0] || '---';
+                let cliente = titleParts[1] || '---';
+
+                document.getElementById('eventCar').textContent = placa;
+                document.getElementById('eventClient').textContent = cliente;
+                
+                // Formata hora
+                let start = info.event.start;
+                let timeString = start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                document.getElementById('eventTime').textContent = start.toLocaleDateString() + ' às ' + timeString;
+
+                // Badge de Status (baseado na cor)
+                let statusBadge = document.getElementById('eventStatusBadge');
+                statusBadge.style.backgroundColor = info.event.backgroundColor;
+                statusBadge.textContent = 'VISUALIZAR'; // Texto genérico pois o status exato não veio no JSON simples
+
+                // Link de detalhes
+                document.getElementById('btnViewDetails').href = `/agendamentos/${eventId}/`;
+                
+                // Se quiser dados completos (Serviço, Local), precisaríamos adicionar ao Serializer 'extendedProps'
+                // Por enquanto, mostramos "Ver Detalhes"
+                document.getElementById('eventService').textContent = "Ver detalhes...";
+                document.getElementById('eventLocation').textContent = "Ver detalhes...";
+
+                modal.show();
             }
+        });
+
+        calendar.render();
+
+        // Força atualização do layout ao trocar tema (para re-calcular cores se necessário)
+        const themeBtn = document.getElementById('theme-switcher');
+        if(themeBtn) {
+            themeBtn.addEventListener('click', function() {
+                setTimeout(() => {
+                    calendar.updateSize(); // Redesenha
+                }, 200);
+            });
         }
     });
-    
-    calendar.render();
-});
 </script>
 {% endblock %}

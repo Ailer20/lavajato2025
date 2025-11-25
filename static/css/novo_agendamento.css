@@ -1,0 +1,135 @@
+/* lavajato2025/static/css/novo_agendamento.css */
+
+/* --- Layout Geral --- */
+.form-section {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* --- Botões de Seleção (Local, Prioridade) --- */
+.selection-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-selection {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    flex: 1;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-selection:hover:not(:disabled) {
+    background-color: var(--hover-bg);
+    color: var(--text-light);
+    border-color: var(--text-muted);
+}
+
+.btn-selection.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+}
+
+/* Cores específicas para Prioridade */
+.btn-priority[data-value="BAIXA"].active { background-color: #10b981; border-color: #10b981; }
+.btn-priority[data-value="NORMAL"].active { background-color: #3b82f6; border-color: #3b82f6; }
+.btn-priority[data-value="ALTA"].active { background-color: #f59e0b; border-color: #f59e0b; }
+.btn-priority[data-value="URGENTE"].active { background-color: #ef4444; border-color: #ef4444; }
+
+/* --- Card de Valor Estimado (Resumo) --- */
+.price-card {
+    background: linear-gradient(145deg, var(--card-bg), var(--hover-bg));
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+    position: sticky;
+    top: 100px; /* Fica fixo ao rolar a página */
+}
+
+.price-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.price-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--success-color);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.price-details {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: 1rem;
+}
+
+/* --- Busca de Veículo --- */
+.vehicle-search-wrapper {
+    position: relative;
+}
+
+.search-status {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+}
+
+.vehicle-info-card {
+    background-color: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+.vehicle-info-card.show { display: block; animation: fadeIn 0.3s ease; }
+
+/* Responsividade */
+@media (max-width: 992px) {
+    .price-card {
+        position: static;
+        margin-bottom: 1.5rem;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}

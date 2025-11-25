@@ -2,57 +2,101 @@
    ARQUIVO BASE - Variáveis de Tema e Estilos Globais
    ========================================================================== */
 
-/* 1. DEFINIÇÃO DAS VARIÁVEIS DE TEMA */
 :root {
-    /* Tema Escuro (Padrão) */
-    --color-scheme: dark; /* ADICIONE ESTA LINHA */
-    --primary-color: #3b82f6; --primary-dark: #1d4ed8;
-    --success-color: #10b981; --success-dark: #059669;
-    --warning-color: #f59e0b; --danger-color: #ef4444;
-    --info-color: #3b82f6; --purple-color: #8b5cf6; --gray-color: #6b7280;
-    --background-color: #111827; --card-bg: #1f2937; --card-header-bg: #374151;
-    --input-bg: #374151; --input-focus-bg: #4b5563; --hover-bg: #374151;
-    --text-light: #f3f4f6; --text-muted: #9ca3af; --text-placeholder: #6b7280; --text-white: #ffffff;
-    --border-color: #4b5563; --border-focus-color: #3b82f6;
-    --campo-texto-bg: #4b5563;
+    /* --- TEMA ESCURO (Padrão / Dark Mode) --- */
+    --color-scheme: dark;
+    
+    /* Cores Principais */
+    --primary-color: #3b82f6;       
+    --primary-dark: #2563eb;        
+    --success-color: #10b981;       
+    
+    /* FUNDOS (SLATE DARK) - FORÇANDO CORES ESCURAS */
+    --background-color: #0f172a;    /* Fundo da página */
+    --card-bg: #1e293b;             /* Fundo dos cards */
+    --card-header-bg: #334155;      /* Cabeçalho dos cards */
+    --hover-bg: #334155;            
+    
+    /* INPUTS (Importante para corrigir o branco) */
+    --input-bg: #0f172a;            
+    --input-focus-bg: #1e293b;
+    --border-color: #475569;        
+    
+    /* TEXTOS */
+    --text-light: #f8fafc;          
+    --text-muted: #cbd5e1;          
+    --text-placeholder: #64748b;    
 }
 
+/* --- TEMA CLARO (Só ativa se a classe estiver no body) --- */
 body.light-theme {
-    /* Tema Claro */
-    --color-scheme: light; /* ADICIONE ESTA LINHA */
-    --primary-color: #0d6efd; --primary-dark: #0a58ca;
-    --success-color: #198754; --success-dark: #146c43;
-    --warning-color: #ffc107; --danger-color: #dc3545;
-    --info-color: #0dcaf0; --purple-color: #6f42c1; --gray-color: #6c757d;
-    --background-color: #f8f9fa; --card-bg: #ffffff; --card-header-bg: #f1f3f5;
-    --input-bg: #ffffff; --input-focus-bg: #ffffff; --hover-bg: #f1f3f5;
-    --text-light: #212529; --text-muted: #6c757d; --text-placeholder: #6c757d; --text-white: #ffffff;
-    --border-color: #dee2e6; --border-focus-color: #86b7fe;
-    --campo-texto-bg: rgba(214, 214, 214, 0.651);
-
+    --color-scheme: light;
+    --background-color: #f1f5f9;
+    --card-bg: #ffffff;
+    --card-header-bg: #f8fafc;
+    --hover-bg: #e2e8f0;
+    --input-bg: #ffffff;
+    --input-focus-bg: #ffffff;
+    --border-color: #cbd5e1;
+    --text-light: #0f172a;
+    --text-muted: #64748b;
 }
 
-/* 2. ESTILOS GLOBAIS */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
+/* --- GERAL --- */
 body {
+    background-color: var(--background-color) !important;
+    color: var(--text-light) !important;
     font-family: 'Inter', sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-light);
-    line-height: 1.6;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    color: var(--text-light);
+/* Força os Inputs a obedecerem o tema */
+input, select, textarea, .form-control, .form-select {
+    background-color: var(--input-bg) !important;
+    color: var(--text-light) !important;
+    border-color: var(--border-color) !important;
 }
 
-.text-muted {
-    color: var(--text-muted) !important;
+/* Texto dentro dos inputs */
+.form-control::placeholder {
+    color: var(--text-placeholder) !important;
 }
 
-.fade-in { animation: fadeIn 0.5s ease-out; }
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Foco nos inputs */
+.form-control:focus, .form-select:focus {
+    background-color: var(--input-focus-bg) !important;
+    color: var(--text-light) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+}
+
+/* Cards do Bootstrap */
+.card {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-light) !important;
+}
+
+.card-header {
+    background-color: var(--card-header-bg) !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+/* Links e Ícones */
+a { color: var(--primary-color); text-decoration: none; }
+a:hover { color: var(--primary-dark); }
+i { color: inherit; }
+
+/* ==========================================================================
+   CORREÇÃO DE GRID (Obriga o espaçamento a funcionar)
+   ========================================================================== */
+.row {
+    --bs-gutter-x: 1.5rem;
+    margin-right: calc(-.5 * var(--bs-gutter-x));
+    margin-left: calc(-.5 * var(--bs-gutter-x));
+}
+
+.row > * {
+    padding-right: calc(var(--bs-gutter-x) * .5);
+    padding-left: calc(var(--bs-gutter-x) * .5);
 }

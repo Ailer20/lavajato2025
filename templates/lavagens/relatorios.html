@@ -1,685 +1,466 @@
 {% extends 'base/base.html' %}
-
 {% load static %}
 
-{% block title %}Relatórios - Lava Jato 2025{% endblock %}
+{% block title %}Relatórios Gerenciais - Lava Jato 2025{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">       <!-- 1. Cérebro (Variáveis ) -->
-    <link rel="stylesheet" href="{% static 'css/components.css' %}"> <!-- 2. Componentes -->
-    <link rel="stylesheet" href="{% static 'css/pages.css' %}">      <!-- 3. Páginas Específicas -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    
+    <link rel="stylesheet" href="{% static 'css/relatorios.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="fade-in">
-    <!-- Header -->
-    <div class="search-container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h2 class="mb-3">
-                    <i class="fas fa-chart-bar me-2"></i>
-                    RELATÓRIOS E ESTATÍSTICAS
-                </h2>
-                
-                <!-- Filtros de período -->
-                <form method="GET" class="row g-3" id="filtroRelatorio">
-                    <div class="col-md-3">
-                        <label class="form-label-custom">Data Início</label>
-                        <input type="date" 
-                               class="form-control form-control-custom" 
-                               name="data_inicio" 
-                               id="data_inicio"
-                               value="{{ data_inicio }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label-custom">Data Fim</label>
-                        <input type="date" 
-                               class="form-control form-control-custom" 
-                               name="data_fim" 
-                               id="data_fim"
-                               value="{{ data_fim }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label-custom">Base</label>
-                        <select class="form-control form-control-custom" name="base_filtro">
-                            <option value="">Todas as Bases</option>
-                            {% for base in bases %}
-                                <option value="{{ base.id }}" {% if base_filtro == base.id|stringformat:"s" %}selected{% endif %}>
-                                    {{ base.nome }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label-custom">&nbsp;</label>
-                        <button type="submit" class="btn btn-primary-custom w-100">
-                            <i class="fas fa-search me-1"></i>
-                            Filtrar
-                        </button>
-                    </div>
-                </form>
+<div class="reports-container fade-in">
+    
+    <div class="filter-bar">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h4 class="mb-0 fw-bold" style="color: var(--text-light);">
+                <i class="fas fa-chart-pie me-2"></i>Dashboard Analítico
+            </h4>
+            
+            <span class="badge d-flex align-items-center gap-2" 
+                  style="background-color: var(--input-bg); color: var(--text-muted); border: 1px solid var(--border-color);">
+                <i class="far fa-calendar-alt"></i>
+                {{ data_inicio|date:"d/m/Y" }} até {{ data_fim|date:"d/m/Y" }}
+            </span>
+        </div>
+        
+        <form method="GET" class="row g-3 align-items-end" id="filtroRelatorio">
+            <div class="col-md-3">
+                <label class="form-label">Data Início</label>
+                <input type="date" class="form-control" name="data_inicio" value="{{ data_inicio }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Data Fim</label>
+                <input type="date" class="form-control" name="data_fim" value="{{ data_fim }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Filtrar por Base</label>
+                <select class="form-select" name="base_filtro">
+                    <option value="">Todas as Bases</option>
+                    {% for base in bases %}
+                        <option value="{{ base.id }}" {% if base_filtro == base.id|stringformat:"s" %}selected{% endif %}>
+                            {{ base.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter me-2"></i>Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi-card kpi-primary">
+            <div class="kpi-icon">
+                <i class="fas fa-car"></i>
+            </div>
+            <div class="kpi-info">
+                <h3>{{ estatisticas.total_lavagens }}</h3>
+                <p>Total Lavagens</p>
+            </div>
+        </div>
+
+        <div class="kpi-card kpi-warning">
+            <div class="kpi-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="kpi-info">
+                <h3>{{ estatisticas.lavagens_em_andamento }}</h3>
+                <p>Em Andamento</p>
+            </div>
+        </div>
+
+        <div class="kpi-card kpi-success">
+            <div class="kpi-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="kpi-info">
+                <h3>{{ estatisticas.lavagens_concluidas }}</h3>
+                <p>Concluídas</p>
+            </div>
+        </div>
+
+        <div class="kpi-card kpi-info">
+            <div class="kpi-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="kpi-info">
+                <h3>R$ {{ estatisticas.faturamento_mes }}</h3>
+                <p>Faturamento (Mês)</p>
             </div>
         </div>
     </div>
 
-    <!-- Cards de Estatísticas -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card-custom">
-                <div class="card-body text-center">
-                    <i class="fas fa-car-wash fa-2x text-primary mb-2"></i>
-                    <h3 class="text-primary">{{ estatisticas.total_lavagens }}</h3>
-                    <p class="mb-0">Total de Lavagens</p>
-                </div>
+    <div class="charts-grid">
+        
+        <div class="chart-wrapper col-span-12">
+            <div class="chart-header">
+                <h5 class="chart-title">Evolução do Faturamento (Diário)</h5>
+                <small class="text-muted">Ticket Médio: R$ {{ ticket_medio|floatformat:2 }}</small>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card-custom">
-                <div class="card-body text-center">
-                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
-                    <h3 class="text-warning">{{ estatisticas.lavagens_em_andamento }}</h3>
-                    <p class="mb-0">Em Andamento</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card-custom">
-                <div class="card-body text-center">
-                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
-                    <h3 class="text-success">{{ estatisticas.lavagens_concluidas }}</h3>
-                    <p class="mb-0">Concluídas</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card-custom">
-                <div class="card-body text-center">
-                    <i class="fas fa-dollar-sign fa-2x text-info mb-2"></i>
-                    <h3 class="text-info">R$ {{ estatisticas.faturamento_mes }}</h3>
-                    <p class="mb-0">Faturamento do Mês</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Gráficos -->
-    <div class="row mb-4">
-        <!-- Gráfico de Lavagens por Status -->
-        <div class="col-md-6">
-            <div class="card-custom">
-                <div class="card-header-custom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-pie-chart me-2"></i>
-                        Lavagens por Status
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="graficoStatus" width="400" height="300"></canvas>
-                </div>
+            <div class="chart-container">
+                <canvas id="graficoFaturamento"></canvas>
             </div>
         </div>
 
-        <!-- Gráfico de Lavagens por Base -->
-        <div class="col-md-6">
-            <div class="card-custom">
-                <div class="card-header-custom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-bar-chart me-2"></i>
-                        Lavagens por Base
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="graficoBase" width="400" height="300"></canvas>
-                </div>
+        <div class="chart-wrapper col-span-6">
+            <div class="chart-header">
+                <h5 class="chart-title">Distribuição por Status</h5>
             </div>
-        </div>
-    </div>
-
-    <!-- Gráfico de Faturamento por Período -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card-custom">
-                <div class="card-header-custom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-line-chart me-2"></i>
-                        Faturamento por Período
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="graficoFaturamento" width="800" height="400"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Novos Gráficos -->
-    <div class="row mb-4">
-        <!-- Performance dos Lavadores -->
-        <div class="col-md-6">
-            <div class="card-custom">
-                <div class="card-header-custom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-users me-2"></i>
-                        Performance dos Lavadores
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="graficoLavadores" width="400" height="300"></canvas>
-                </div>
+            <div class="chart-container">
+                <canvas id="graficoStatus"></canvas>
             </div>
         </div>
 
-        <!-- Ranking de Carros/Contratos (Tabela) -->
-        <div class="col-md-6">
-            <div class="card-custom">
-                <div class="card-header-custom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-trophy me-2"></i>
-                        Ranking de Carros/Contratos
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-custom">
-                        <thead>
-                            <tr>
-                                <th>RANK</th>
-                                <th>QTD LAVAGENS</th>
-                                <th>PLACA</th>
-                                <th>CONTRATO</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-{% for item in ranking_carros_contratos %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ item.total_lavagens }}</td>
-                                <td>{{ item.placa_veiculo }}</td>
-                                <td>{{ item.contrato }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+        <div class="chart-wrapper col-span-6">
+            <div class="chart-header">
+                <h5 class="chart-title">Volume por Base</h5>
             </div>
-        </div>
-    </div>
-
-    <div class="row mb-4">
-        <!-- Consumo de Materiais por Mês -->
-        <div class="col-12">
-            <div class="card-custom">
-                <div class="card-header-custom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-box-open me-2"></i>
-                        Consumo de Materiais por Mês
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="graficoMateriais" width="800" height="400"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mb-4">
-        <!-- Gráfico de Lavagens por Contrato -->
-        <div class="col-md-6">
-            <div class="card-custom">
-                <div class="card-header-custom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-file-contract me-2"></i>
-                        Lavagens por Contrato
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="graficoContrato" width="400" height="300"></canvas>
-                </div>
+            <div class="chart-container">
+                <canvas id="graficoBase"></canvas>
             </div>
         </div>
 
-        <!-- Gráfico de Lavagens por Transporte/Equipamento -->
-        <div class="col-md-6">
-            <div class="card-custom">
-                <div class="card-header-custom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-truck-moving me-2"></i>
-                        Lavagens por Transporte/Equipamento
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="graficoTransporte" width="400" height="300"></canvas>
-                </div>
+        <div class="chart-wrapper col-span-6">
+            <div class="chart-header">
+                <h5 class="chart-title">Top Performance: Lavadores</h5>
+            </div>
+            <div class="chart-container">
+                <canvas id="graficoLavadores"></canvas>
             </div>
         </div>
-    </div>
 
-    <!-- Tabela de Resumo -->
-    <div class="card-custom">
-        <div class="card-header-custom">
-            <h5 class="mb-0">
-                <i class="fas fa-table me-2"></i>
-                Resumo Detalhado
-            </h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6 class="text-primary mb-3">Estatísticas Gerais</h6>
-                    <table class="table table-custom">
-                        <tbody>
-                            <tr>
-                                <td>Total de Lavagens</td>
-                                <td><strong>{{ estatisticas.total_lavagens }}</strong></td>
-                            </tr>
-                            <tr>
-                                <td>Lavagens Concluídas</td>
-                                <td><strong class="text-success">{{ estatisticas.lavagens_concluidas }}</strong></td>
-                            </tr>
-                            <tr>
-                                <td>Lavagens Canceladas</td>
-                                <td><strong class="text-danger">{{ estatisticas.lavagens_canceladas }}</strong></td>
-                            </tr>
-                            <tr>
-                                <td>Tempo Médio de Lavagem</td>
-                                <td><strong>{{ estatisticas.tempo_medio_lavagem }} min</strong></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="col-md-6">
-                    <h6 class="text-primary mb-3">Faturamento</h6>
-                    <table class="table table-custom">
-                        <tbody>
-                            <tr>
-                                <td>Faturamento do Dia</td>
-                                <td><strong class="text-success">R$ {{ estatisticas.faturamento_dia }}</strong></td>
-                            </tr>
-                            <tr>
-                                <td>Faturamento do Mês</td>
-                                <td><strong class="text-success">R$ {{ estatisticas.faturamento_mes }}</strong></td>
-                            </tr>
-                            <tr>
-                                <td>Ticket Médio</td>
-                                <td><strong>R$ {{ ticket_medio|floatformat:2 }}</strong></td>
-                            </tr>
-                            <tr>
-                                <td>Meta do Mês</td>
-                                <td><strong class="text-info">R$ 50.000,00</strong></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <div class="chart-wrapper col-span-6">
+            <div class="chart-header">
+                <h5 class="chart-title">Top 10 Veículos/Contratos</h5>
+            </div>
+            <div class="table-wrapper table-responsive">
+                <table class="table table-hover table-sm align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Placa</th>
+                            <th>Contrato</th>
+                            <th class="text-end">Qtd</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in ranking_carros_contratos %}
+                        <tr>
+                            <td>
+                                {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}{% endif %}
+                            </td>
+                            <td class="fw-bold">{{ item.placa_veiculo }}</td>
+                            <td class="text-muted small">{{ item.contrato|default:"Avulso" }}</td>
+                            <td class="text-end fw-bold text-primary">{{ item.total_lavagens }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center text-muted py-3">Sem dados no período</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
+
+        <div class="chart-wrapper col-span-12">
+            <div class="chart-header">
+                <h5 class="chart-title">Custo Estimado de Materiais Utilizados</h5>
+            </div>
+            <div class="chart-container">
+                <canvas id="graficoMateriais"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-wrapper col-span-6">
+            <div class="chart-header"><h5 class="chart-title">Lavagens por Contrato</h5></div>
+            <div class="chart-container"><canvas id="graficoContrato"></canvas></div>
+        </div>
+        
+        <div class="chart-wrapper col-span-6">
+            <div class="chart-header"><h5 class="chart-title">Lavagens por Transporte/Equip.</h5></div>
+            <div class="chart-container"><canvas id="graficoTransporte"></canvas></div>
+        </div>
+
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
 <script>
-// Configuração global dos gráficos
-Chart.defaults.color = '#ffffff';
-Chart.defaults.borderColor = '#404040';
+/**
+ * ==========================================
+ * SISTEMA DE CORES E TEMA
+ * ==========================================
+ */
 
-// Gráfico de Status (Pizza)
-const ctxStatus = document.getElementById('graficoStatus').getContext('2d');
-new Chart(ctxStatus, {
-    type: 'doughnut',
-    data: {
-        labels: ['Em Andamento', 'Concluídas', 'Canceladas'],
-        datasets: [{
-            data: [
-                {{ estatisticas.lavagens_em_andamento }},
-                {{ estatisticas.lavagens_concluidas }},
-                {{ estatisticas.lavagens_canceladas }}
-            ],
-            backgroundColor: [
-                '#ffc107',
-                '#28a745',
-                '#dc3545'
-            ],
-            borderWidth: 2,
-            borderColor: '#2d2d2d'
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    color: '#ffffff',
-                    padding: 20
-                }
-            }
-        }
-    }
-});
+// Registra o plugin de DataLabels globalmente
+Chart.register(ChartDataLabels);
 
-// Gráfico de Bases (Barras)
-const ctxBase = document.getElementById('graficoBase').getContext('2d');
-new Chart(ctxBase, {
-    type: 'bar',
-    data: {
-        labels: [
-            {% for base, total in estatisticas.lavagens_por_base.items %}
-                '{{ base }}',
-            {% endfor %}
-        ],
-        datasets: [{
-            label: 'Lavagens',
-            data: [
-                {% for base, total in estatisticas.lavagens_por_base.items %}
-                    {{ total }},
-                {% endfor %}
-            ],
-            backgroundColor: '#3b4cb8',
-            borderColor: '#2d3a8c',
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    color: '#ffffff'
-                },
-                grid: {
-                    color: '#404040'
-                }
-            },
-            x: {
-                ticks: {
-                    color: '#ffffff'
-                },
-                grid: {
-                    color: '#404040'
-                }
-            }
-        },
-        plugins: {
-            legend: {
-                labels: {
-                    color: '#ffffff'
-                }
-            }
-        }
-    }
-});
-
-// Gráfico de Faturamento (Linha)
-const ctxFaturamento = document.getElementById('graficoFaturamento').getContext('2d');
-new Chart(ctxFaturamento, {
-    type: 'line',
-    data: {
-        labels: {{ faturamento_labels|safe }},
-        datasets: [{
-            label: 'Faturamento (R$)',
-            data: {{ faturamento_dados|safe }},
-            borderColor: '#28a745',
-            backgroundColor: 'rgba(40, 167, 69, 0.1)',
-            borderWidth: 3,
-            fill: true,
-            tension: 0.4
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    color: '#ffffff',
-                    callback: function(value) {
-                        return 'R$ ' + value.toLocaleString('pt-BR');
-                    }
-                },
-                grid: {
-                    color: '#404040'
-                }
-            },
-            x: {
-                ticks: {
-                    color: '#ffffff'
-                },
-                grid: {
-                    color: '#404040'
-                }
-            }
-        },
-        plugins: {
-            legend: {
-                labels: {
-                    color: '#ffffff'
-                }
-            }
-        }
-    }
-});
-
-// Função para exportar relatório
-function exportarRelatorio() {
-    const dataInicio = document.getElementById('data_inicio').value;
-    const dataFim = document.getElementById('data_fim').value;
+// Paleta de Cores Profissional (Focada em Azul/Sóbrio)
+const COLORS = {
+    primary: '#3b82f6',      // Azul Principal
+    primaryLight: 'rgba(59, 130, 246, 0.2)',
+    success: '#10b981',      // Verde Sucesso
+    successLight: 'rgba(16, 185, 129, 0.2)',
+    warning: '#f59e0b',      // Laranja Alerta
+    warningLight: 'rgba(245, 158, 11, 0.2)',
+    danger: '#ef4444',       // Vermelho Erro
+    dangerLight: 'rgba(239, 68, 68, 0.2)',
+    info: '#6366f1',         // Indigo
+    purple: '#8b5cf6',       // Roxo
     
-    if (!dataInicio || !dataFim) {
-        alert('Por favor, selecione o período para exportação.');
-        return;
-    }
-    
-    // Aqui você pode implementar a exportação para PDF
-    window.open(`/api/lavagens/relatorio_periodo/?data_inicio=${dataInicio}&data_fim=${dataFim}&format=pdf`);
+    // Cores de Texto e Grade (Dinâmicas)
+    textLight: '#f8fafc',    // Para fundo escuro
+    textDark: '#1e293b',     // Para fundo claro
+    gridLight: '#e2e8f0',    // Grade suave no claro
+    gridDark: '#334155'      // Grade suave no escuro
+};
+
+// 1. Detecta se o site está em modo escuro
+function isDarkMode() {
+    // Ajuste esta lógica conforme seu sistema de tema (classe no body ou localStorage)
+    return !document.body.classList.contains('light-theme'); 
 }
 
-// Definir datas padrão (último mês)
-document.addEventListener('DOMContentLoaded', function() {
-    const hoje = new Date();
-    const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    
-    if (!document.getElementById('data_inicio').value) {
-        document.getElementById('data_inicio').value = primeiroDiaMes.toISOString().split('T')[0];
-    }
-    
-    if (!document.getElementById('data_fim').value) {
-        document.getElementById('data_fim').value = hoje.toISOString().split('T')[0];
-    }
-});
+// 2. Retorna configuração do Chart.js baseada no tema atual
+function getThemeConfig() {
+    const dark = isDarkMode();
+    return {
+        textColor: dark ? COLORS.textLight : COLORS.textDark,
+        gridColor: dark ? COLORS.gridDark : COLORS.gridLight,
+        tooltipBg: dark ? '#1e293b' : '#ffffff',
+        tooltipText: dark ? '#fff' : '#000',
+        borderColor: dark ? '#1e293b' : '#ffffff'
+    };
+}
 
-// Gráfico de Performance dos Lavadores (Barras)
-const ctxLavadores = document.getElementById("graficoLavadores").getContext("2d");
-new Chart(ctxLavadores, {
-    type: "bar",
-    data: {
-        labels: {{ lavadores_labels|safe }},
-        datasets: [{
-            label: "Lavagens Concluídas",
-            data: {{ lavadores_dados|safe }},
-            backgroundColor: "#007bff",
-            borderColor: "#0056b3",
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    color: "#ffffff"
-                },
-                grid: {
-                    color: "#404040"
+// Armazena as instâncias dos gráficos para poder destruir/recriar
+let chartsInstance = {};
+
+/**
+ * ==========================================
+ * FUNÇÃO GERADORA DE GRÁFICOS
+ * ==========================================
+ */
+function createChart(ctxId, type, labels, datasets, options = {}) {
+    const theme = getThemeConfig();
+    const ctxElement = document.getElementById(ctxId);
+    
+    if (!ctxElement) return; // Segurança caso o elemento não exista
+
+    // Se já existe um gráfico neste canvas, destrói ele antes (evita bug de sobreposição)
+    if (chartsInstance[ctxId]) {
+        chartsInstance[ctxId].destroy();
+    }
+
+    const ctx = ctxElement.getContext('2d');
+
+    // Configuração base para DataLabels (Números nas barras)
+    const isBar = type === 'bar';
+
+    chartsInstance[ctxId] = new Chart(ctx, {
+        type: type,
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 20, // Espaço extra no topo para o número não cortar
+                    right: 20
                 }
             },
-            x: {
-                ticks: {
-                    color: "#ffffff"
+            plugins: {
+                legend: {
+                    labels: { color: theme.textColor, font: { family: "'Inter', sans-serif" } },
+                    position: 'bottom'
                 },
-                grid: {
-                    color: "#404040"
+                tooltip: {
+                    backgroundColor: theme.tooltipBg,
+                    titleColor: theme.tooltipText,
+                    bodyColor: theme.tooltipText,
+                    titleFont: { family: "'Inter', sans-serif", weight: 'bold' },
+                    borderColor: theme.gridColor,
+                    borderWidth: 1,
+                    padding: 10,
+                    displayColors: true
+                },
+                // --- CONFIGURAÇÃO DOS NÚMEROS NAS BARRAS ---
+                datalabels: {
+                    display: isBar, // Só exibe se for gráfico de barra
+                    color: theme.textColor,
+                    anchor: 'end', // Ancorar no final da barra
+                    align: 'end',  // Alinhar para fora (topo ou direita)
+                    offset: 4,     // Distância da barra
+                    font: {
+                        weight: 'bold',
+                        family: "'Inter', sans-serif",
+                        size: 11
+                    },
+                    formatter: function(value, context) {
+                        // Não mostra zeros para limpar o visual
+                        if (value === 0 || value === null) return '';
+                        return value;
+                    }
                 }
-            }
-        },
+            },
+            scales: type === 'doughnut' || type === 'pie' ? {} : {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: theme.gridColor, borderDash: [2, 4] },
+                    ticks: { color: theme.textColor, font: { family: "'Inter', sans-serif", size: 11 } }
+                },
+                x: {
+                    grid: { display: false }, // Remove grade vertical para visual mais limpo
+                    ticks: { color: theme.textColor, font: { family: "'Inter', sans-serif", size: 11 } }
+                }
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            ...options
+        }
+    });
+}
+
+/**
+ * ==========================================
+ * RENDERIZAÇÃO DOS DADOS
+ * ==========================================
+ */
+function renderAllCharts() {
+    const theme = getThemeConfig();
+
+    // --- 1. Faturamento (Linha Suave) ---
+    createChart('graficoFaturamento', 'line', {{ faturamento_labels|safe }}, [{
+        label: 'Faturamento (R$)',
+        data: {{ faturamento_dados|safe }},
+        borderColor: COLORS.primary,
+        backgroundColor: COLORS.primaryLight,
+        borderWidth: 3,
+        pointBackgroundColor: COLORS.primary,
+        pointBorderColor: theme.tooltipBg,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        fill: true,
+        tension: 0.4
+    }], {
         plugins: {
-            legend: {
-                labels: {
-                    color: "#ffffff"
-                }
+            datalabels: { display: false } // Esconde números na linha para não poluir
+        }
+    });
+
+    // --- 2. Status (Rosquinha) ---
+    createChart('graficoStatus', 'doughnut', ['Em Andamento', 'Concluídas', 'Canceladas'], [{
+        data: [
+            {{ estatisticas.lavagens_em_andamento }},
+            {{ estatisticas.lavagens_concluidas }},
+            {{ estatisticas.lavagens_canceladas }}
+        ],
+        backgroundColor: [COLORS.warning, COLORS.success, COLORS.danger],
+        borderColor: theme.borderColor,
+        borderWidth: 2,
+        hoverOffset: 4
+    }], {
+        plugins: {
+            datalabels: { 
+                display: true,
+                color: '#fff', // Sempre branco dentro da rosca
+                font: { weight: 'bold' },
+                formatter: (value) => value > 0 ? value : ''
             }
         }
-    }
-});
+    });
 
+    // --- 3. Bases (Barra Vertical) ---
+    createChart('graficoBase', 'bar', [
+        {% for base, total in estatisticas.lavagens_por_base.items %} '{{ base }}', {% endfor %}
+    ], [{
+        label: 'Total de Lavagens',
+        data: [{% for base, total in estatisticas.lavagens_por_base.items %} {{ total }}, {% endfor %}],
+        backgroundColor: COLORS.primary,
+        borderRadius: 4,
+        barPercentage: 0.6
+    }]);
 
+    // --- 4. Lavadores (Barra Horizontal) ---
+    createChart('graficoLavadores', 'bar', {{ lavadores_labels|safe }}, [{
+        label: 'Lavagens Realizadas',
+        data: {{ lavadores_dados|safe }},
+        backgroundColor: COLORS.success,
+        borderRadius: 4,
+        barPercentage: 0.7
+    }], { indexAxis: 'y' }); // Transforma em barra horizontal
 
-// Gráfico de Consumo de Materiais por Mês (Barras Horizontais)
-const ctxMateriais = document.getElementById("graficoMateriais").getContext("2d");
-new Chart(ctxMateriais, {
-    type: "bar",
-    data: {
-        labels: {{ materiais_labels|safe }},
-        datasets: [{
-            data: {{ materiais_dados|safe }},
-            backgroundColor: [
-                "#fd7e14", "#20c997", "#6610f2", "#e83e8c", "#ffc107", "#17a2b8", "#dc3545", "#6c757d"
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
+    // --- 5. Materiais (Barra - Com formatação de R$) ---
+    createChart('graficoMateriais', 'bar', {{ materiais_labels|safe }}, [{
+        label: 'Custo Estimado (R$)',
+        data: {{ materiais_dados|safe }},
+        backgroundColor: COLORS.danger,
+        borderRadius: 4
+    }], {
         indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            x: {
-                beginAtZero: true,
-                ticks: {
-                    color: "#ffffff"
-                },
-                grid: {
-                    color: "#404040"
-                }
-            },
-            y: {
-                ticks: {
-                    color: "#ffffff"
-                },
-                grid: {
-                    color: "#404040"
-                }
-            }
-        },
         plugins: {
-            legend: {
-                position: "bottom",
-                labels: {
-                    color: "#ffffff",
-                    padding: 20
+            datalabels: {
+                display: true,
+                anchor: 'end',
+                align: 'end',
+                color: theme.textColor,
+                formatter: function(value) {
+                    if (value === 0) return '';
+                    return 'R$ ' + value.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 }
             }
         }
-    }
-});
+    });
 
-// Gráfico de Lavagens por Contrato (Colunas Verticais)
-const ctxContrato = document.getElementById("graficoContrato").getContext("2d");
-new Chart(ctxContrato, {
-    type: "bar",
-    data: {
-        labels: {{ contrato_labels|safe }},
-        datasets: [{
-            label: "Número de Lavagens",
-            data: {{ contrato_dados|safe }},
-            backgroundColor: "#20c997",
-            borderColor: "#17a2b8",
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            x: {
-                beginAtZero: true,
-                ticks: {
-                    color: "#ffffff"
-                },
-                grid: {
-                    color: "#404040"
-                }
-            },
-            y: {
-                ticks: {
-                    color: "#ffffff"
-                },
-                grid: {
-                    color: "#404040"
-                }
-            }
-        },
-        plugins: {
-            legend: {
-                labels: {
-                    color: "#ffffff"
-                }
-            }
-        }
-    }
-});
+    // --- 6. Contratos (Barra) ---
+    createChart('graficoContrato', 'bar', {{ contrato_labels|safe }}, [{
+        label: 'Qtd Lavagens',
+        data: {{ contrato_dados|safe }},
+        backgroundColor: COLORS.info,
+        borderRadius: 4
+    }]);
 
-// Gráfico de Lavagens por Transporte/Equipamento (Colunas Verticais)
-const ctxTransporte = document.getElementById("graficoTransporte").getContext("2d");
-new Chart(ctxTransporte, {
-    type: "bar",
-    data: {
-        labels: {{ transporte_labels|safe }},
-        datasets: [{
-            label: "Número de Lavagens",
-            data: {{ transporte_dados|safe }},
-            backgroundColor: "#fd7e14",
-            borderColor: "#e85e00",
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            x: {
-                beginAtZero: true,
-                ticks: {
-                    color: "#ffffff"
-                },
-                grid: {
-                    color: "#404040"
-                }
-            },
-            y: {
-                ticks: {
-                    color: "#ffffff"
-                },
-                grid: {
-                    color: "#404040"
-                }
-            }
-        },
-        plugins: {
-            legend: {
-                labels: {
-                    color: "#ffffff"
-                }
-            }
-        }
+    // --- 7. Transporte (Barra) ---
+    createChart('graficoTransporte', 'bar', {{ transporte_labels|safe }}, [{
+        label: 'Qtd Lavagens',
+        data: {{ transporte_dados|safe }},
+        backgroundColor: COLORS.purple,
+        borderRadius: 4
+    }]);
+}
+
+/**
+ * ==========================================
+ * INICIALIZAÇÃO
+ * ==========================================
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Renderiza gráficos ao carregar
+    renderAllCharts();
+
+    // 2. Observa o botão de troca de tema
+    const themeBtn = document.getElementById('theme-switcher');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            setTimeout(() => {
+                renderAllCharts();
+            }, 150);
+        });
     }
 });
 </script>
 {% endblock %}
-

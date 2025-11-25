@@ -1,0 +1,58 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card-custom border-warning">
+                <div class="card-header-custom bg-warning text-dark d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-dolly me-2"></i>Registrar Saída de Material</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-light border mb-4">
+                        <small><i class="fas fa-info-circle text-info"></i> 
+                        Use esta tela para registrar qualquer saída do estoque:
+                        <ul class="mb-0 mt-1 ps-3">
+                            <li>Para <strong>Consumo Interno</strong> (gasto na loja), deixe o "Responsável" em branco.</li>
+                            <li>Para <strong>Entregar Ferramenta</strong> a alguém, selecione o "Responsável".</li>
+                        </ul>
+                        </small>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.produto.label }}</label>
+                            {{ form.produto }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ form.quantidade.label }}</label>
+                                {{ form.quantidade }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ form.responsavel.label }}</label>
+                                {{ form.responsavel }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.observacao.label }}</label>
+                            {{ form.observacao }}
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-warning fw-bold">
+                                <i class="fas fa-check me-2"></i> Confirmar Saída
+                            </button>
+                            <a href="{% url 'estoque_lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

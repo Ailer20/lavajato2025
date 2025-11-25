@@ -1,0 +1,52 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0"><i class="fas fa-box-open me-2"></i>Meu Estoque Pessoal</h2>
+            <p class="text-muted">Materiais sob responsabilidade de: <strong>{{ lavador.nome }}</strong></p>
+        </div>
+        <a href="{% url 'devolucao_estoque' %}" class="btn btn-warning btn-lg">
+            <i class="fas fa-undo me-2"></i>Devolver Material
+        </a>
+    </div>
+
+    <div class="row">
+        {% for item in estoque %}
+        <div class="col-md-4 mb-4">
+            <div class="card-custom h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3 text-primary">
+                        <i class="fas fa-tools fa-3x"></i>
+                    </div>
+                    <h5 class="card-title">{{ item.produto.nome }}</h5>
+                    <p class="card-text text-muted">{{ item.produto.descricao|truncatechars:50 }}</p>
+                    
+                    <div class="rounded p-2 mb-3" style="background-color: var(--hover-bg); border: 1px solid var(--border-color);">
+                        <span class="text-muted small">Quantidade Comigo</span>
+                        <div class="fs-2 fw-bold" style="color: var(--text-light);">
+                            {{ item.quantidade }} <small class="fs-6">{{ item.produto.unidade_medida }}</small>
+                        </div>
+                    </div>
+
+                    {% if item.produto.tipo == 'DURAVEL' %}
+                        <span class="badge bg-danger w-100">Item Durável (Devolução Obrigatória)</span>
+                    {% else %}
+                        <span class="badge bg-success w-100">Consumível</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center py-5">
+                <i class="fas fa-check-circle fa-3x mb-3"></i>
+                <h4>Tudo limpo!</h4>
+                <p>Você não possui nenhum material ou ferramenta sob sua responsabilidade no momento.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -4,72 +4,89 @@
 {% block title %}Agendamentos - Lava Jato 2025{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">       <!-- 1. Cérebro (Variáveis ) -->
-    <link rel="stylesheet" href="{% static 'css/components.css' %}"> <!-- 2. Componentes -->
-    <link rel="stylesheet" href="{% static 'css/pages.css' %}">      <!-- 3. Páginas Específicas -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/agendamentos.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class=" mb-1">
-                        <i class="fas fa-calendar-alt me-3"></i>
-                        Agendamentos
-                    </h1>
-                    <p class="text-muted mb-0">Gerencie os agendamentos de lavagens</p>
-                </div>
-                <div>
-                    <a href="{% url 'novo_agendamento' %}" class="btn btn-agendamento">
-                        <i class="fas fa-plus me-2"></i>
-                        Novo Agendamento
-                    </a>
-                    <a href="{% url 'calendario_agendamentos' %}" class="btn btn-calendario ms-2">
-                        <i class="fas fa-calendar me-2"></i>
-                        Calendário
-                    </a>
-                </div>
+<div class="agendamentos-container fade-in">
+    
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h2 class="mb-1 fw-bold" style="color: var(--text-light);">
+                <i class="far fa-calendar-check me-2 text-primary"></i>Central de Agendamentos
+            </h2>
+            <p class="text-muted mb-0">Gerencie a agenda e fila de espera</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'calendario_agendamentos' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-calendar-alt me-2"></i>Visão Calendário
+            </a>
+            <a href="{% url 'novo_agendamento' %}" class="btn btn-success-custom">
+                <i class="fas fa-plus me-2"></i>Novo Agendamento
+            </a>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card stat-primary">
+            <div class="stat-content">
+                <h3>{{ stats.total }}</h3>
+                <p>Total na Agenda</p>
+            </div>
+            <div class="stat-icon">
+                <i class="fas fa-list"></i>
+            </div>
+        </div>
+
+        <div class="stat-card stat-info">
+            <div class="stat-content">
+                <h3>{{ stats.hoje }}</h3>
+                <p>Para Hoje</p>
+            </div>
+            <div class="stat-icon">
+                <i class="fas fa-calendar-day"></i>
+            </div>
+        </div>
+
+        <div class="stat-card stat-success">
+            <div class="stat-content">
+                <h3>{{ stats.agendados }}</h3>
+                <p>Confirmados/Abertos</p>
+            </div>
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+        </div>
+
+        <div class="stat-card stat-danger">
+            <div class="stat-content">
+                <h3>{{ stats.vencidos }}</h3>
+                <p>Atrasados / Vencidos</p>
+            </div>
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle"></i>
             </div>
         </div>
     </div>
 
-    <!-- Estatísticas -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-number">{{ stats.total }}</div>
-                <div class="text-muted">Total de Agendamentos</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-number">{{ stats.hoje }}</div>
-                <div class="text-muted">Agendamentos Hoje</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-number">{{ stats.agendados }}</div>
-                <div class="text-muted">Agendados</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-number text-warning">{{ stats.vencidos }}</div>
-                <div class="text-muted">Vencidos</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filtros -->
     <div class="filter-card">
-        <form method="GET" class="row g-3">
+        <form method="GET" class="row g-3 align-items-end">
             <div class="col-md-3">
-                <label class="form-label ">Status</label>
-                <select name="status" class="form-select">
+                <label class="form-label">Buscar</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-color: var(--border-color);">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" name="busca" class="form-control border-start-0 ps-0"
+                           placeholder="Código, placa, cliente..." value="{{ filtros.busca }}">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select" onchange="this.form.submit()">
                     <option value="">Todos os status</option>
                     {% for value, label in status_choices %}
                         <option value="{{ value }}" {% if filtros.status == value %}selected{% endif %}>
@@ -78,173 +95,161 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-3">
-                <label class="form-label ">Base</label>
-                <select name="base" class="form-select">
-                    <option value="">Todas as bases</option>
-                    {% for base in bases %}
-                        <option value="{{ base.id }}" {% if filtros.base == base.id|stringformat:"s" %}selected{% endif %}>
-                            {{ base.nome }}
-                        </option>
-                    {% endfor %}
-                </select>
+
+            <div class="col-md-2">
+                <label class="form-label">Data</label>
+                <input type="date" name="data" class="form-control" value="{{ filtros.data }}" onchange="this.form.submit()">
             </div>
-            <div class="col-md-3">
-                <label class="form-label ">Data</label>
-                <input type="date" name="data" class="form-control" value="{{ filtros.data }}">
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
             </div>
-            <div class="col-md-3">
-                <label class="form-label ">Buscar</label>
-                <div class="input-group">
-                    <input type="text" name="busca" class="form-control"
-                           placeholder="Código, placa, cliente..." value="{{ filtros.busca }}">
-                    <button type="submit" class="btn btn-outline-themed">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
+            
+            <div class="col-md-2">
+                <a href="{% url 'agendamentos_dashboard' %}" class="btn btn-outline-secondary w-100">Limpar</a>
             </div>
         </form>
     </div>
 
-    <!-- Lista de Agendamentos -->
-    <div class="card-custom">
-
-        <div class="table-agendamentos">
-            <div class="table-responsive"> 
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Data/Hora</th>
-                            <th>Cliente</th>
-                            <th>Placa</th>
-                            <th>Base/Local</th>
-                            <th>Status</th>
-                            <th>Valor</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for agendamento in page_obj %}
-                            <tr {% if agendamento.esta_vencido and agendamento.status in 'AGENDADO,CONFIRMADO' %}class="vencido"{% endif %}>
-                                <td>
-                                    <strong>{{ agendamento.codigo }}</strong>
-                                    {% if agendamento.prioridade == 'ALTA' %}
-                                        <span class="badge bg-warning ms-1">Alta</span>
-                                    {% elif agendamento.prioridade == 'URGENTE' %}
-                                        <span class="badge bg-danger ms-1">Urgente</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div>{{ agendamento.data_agendamento|date:"d/m/Y" }}</div>
-                                    <small class="text-muted">{{ agendamento.hora_agendamento|time:"H:i" }}</small>
-                                    {% if agendamento.esta_vencido and agendamento.status in 'AGENDADO,CONFIRMADO' %}
-                                        <br><small class="text-danger"><i class="fas fa-exclamation-triangle"></i> Vencido</small>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if agendamento.cliente %}
-                                        {{ agendamento.cliente.nome }}
-                                    {% else %}
-                                        <span class="text-muted">Não informado</span>
-                                    {% endif %}
-                                    {% if agendamento.telefone_contato %}
-                                        <br><small class="text-muted">{{ agendamento.telefone_contato }}</small>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <strong>{{ agendamento.placa_veiculo }}</strong>
-                                    {% if agendamento.veiculo %}
-                                        <br><small class="text-muted">{{ agendamento.veiculo.marca }} {{ agendamento.veiculo.modelo }}</small>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div>{{ agendamento.base.nome }}</div>
-                                    <small class="text-muted">{{ agendamento.local.get_nome_display }}</small>
-                                </td>
-                                <td>
-                                    <span class="status-badge status-{{ agendamento.status|lower }}">
-                                        {{ agendamento.get_status_display }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <strong>R$ {{ agendamento.valor_estimado|floatformat:2 }}</strong>
-                                    {% if agendamento.desconto_agendamento > 0 %}
-                                        <br><small class="text-success">Desc: R$ {{ agendamento.desconto_agendamento|floatformat:2 }}</small>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="btn-group-vertical" role="group">
-                                        <a href="{% url 'detalhes_agendamento' agendamento.id %}" class="btn btn-action btn-outline">
-                                            <i class="fas fa-eye"></i> Ver
-                                        </a>
-                                        
-                                        {% if agendamento.status == 'AGENDADO' %}
-                                            <form method="POST" action="{% url 'confirmar_agendamento' agendamento.id %}" class="d-inline">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-action btn-confirmar">
-                                                    <i class="fas fa-check"></i> Confirmar
-                                                </button>
-                                            </form>
-                                        {% endif %}
-                                        
-                                        {% if agendamento.pode_iniciar_lavagem %}
-                                            <form method="POST" action="{% url 'iniciar_lavagem_agendamento' agendamento.id %}" class="d-inline">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-action btn-iniciar">
-                                                    <i class="fas fa-play"></i> Iniciar
-                                                </button>
-                                            </form>
-                                        {% endif %}
-                                        
-                                        {% if agendamento.pode_ser_cancelado %}
-                                            <button type="button" class="btn btn-action btn-cancelar" 
-                                                    onclick="cancelarAgendamento({{ agendamento.id }})">
-                                                <i class="fas fa-times"></i> Cancelar
-                                            </button>
-                                        {% endif %}
+    <div class="table-card">
+        <div class="table-responsive"> 
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Código</th>
+                        <th>Data/Hora</th>
+                        <th>Cliente</th>
+                        <th>Veículo/Placa</th>
+                        <th>Local</th>
+                        <th>Status</th>
+                        <th class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for agendamento in page_obj %}
+                        <tr {% if agendamento.esta_vencido and agendamento.status in 'AGENDADO,CONFIRMADO' %}style="background-color: rgba(239, 68, 68, 0.05);"{% endif %}>
+                            <td>
+                                <div class="fw-bold">{{ agendamento.codigo }}</div>
+                                {% if agendamento.prioridade == 'ALTA' %}
+                                    <span class="priority-badge priority-alta">Alta</span>
+                                {% elif agendamento.prioridade == 'URGENTE' %}
+                                    <span class="priority-badge priority-urgente">Urgente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="fw-bold">{{ agendamento.data_agendamento|date:"d/m/Y" }}</div>
+                                <div class="text-muted small">
+                                    <i class="far fa-clock me-1"></i>{{ agendamento.hora_agendamento|time:"H:i" }}
+                                </div>
+                                {% if agendamento.esta_vencido and agendamento.status in 'AGENDADO,CONFIRMADO' %}
+                                    <div class="text-danger small fw-bold mt-1">
+                                        <i class="fas fa-exclamation-circle"></i> Atrasado
                                     </div>
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="8" class="text-center text-muted py-4">
-                                    <i class="fas fa-calendar-times fa-3x mb-3"></i>
-                                    <br>Nenhum agendamento encontrado
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="text-truncate" style="max-width: 150px;">
+                                    {{ agendamento.cliente.nome|default:"Não informado" }}
+                                </div>
+                                {% if agendamento.telefone_contato %}
+                                    <div class="text-muted small">{{ agendamento.telefone_contato }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="badge bg-dark border border-secondary text-light font-monospace">
+                                    {{ agendamento.placa_veiculo }}
+                                </div>
+                                <div class="small text-muted mt-1">{{ agendamento.veiculo.modelo|default:"-" }}</div>
+                            </td>
+                            <td>
+                                <div>{{ agendamento.base.nome }}</div>
+                                <small class="text-muted">{{ agendamento.local|default:"-" }}</small>
+                            </td>
+                            <td>
+                                {% if agendamento.status == 'AGENDADO' %}
+                                    <span class="status-badge-modern status-agendado">
+                                        <span class="status-dot"></span> Agendado
+                                    </span>
+                                {% elif agendamento.status == 'CONFIRMADO' %}
+                                    <span class="status-badge-modern status-confirmado">
+                                        <span class="status-dot"></span> Confirmado
+                                    </span>
+                                {% elif agendamento.status == 'EM_ANDAMENTO' %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-spinner fa-spin me-1"></i> Em Andamento
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ agendamento.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'detalhes_agendamento' agendamento.id %}" class="btn-icon btn-view" title="Ver Detalhes">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                {% if agendamento.status == 'AGENDADO' %}
+                                    <form method="POST" action="{% url 'confirmar_agendamento' agendamento.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-icon btn-confirm" title="Confirmar Presença">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                                {% if agendamento.pode_iniciar_lavagem %}
+                                    <form method="POST" action="{% url 'iniciar_lavagem_agendamento' agendamento.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-icon btn-play" title="Iniciar Lavagem Agora">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                                {% if agendamento.pode_ser_cancelado %}
+                                    <button type="button" class="btn-icon btn-cancel" 
+                                            onclick="cancelarAgendamento({{ agendamento.id }})" title="Cancelar">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="text-muted opacity-50 mb-2">
+                                    <i class="far fa-calendar fa-3x"></i>
+                                </div>
+                                <p class="text-muted mb-0">Nenhum agendamento encontrado com os filtros atuais.</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Paginação -->
     {% if page_obj.has_other_pages %}
         <nav aria-label="Paginação" class="mt-4">
             <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link bg-dark  border-secondary" href="?page=1">Primeira</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link bg-dark  border-secondary" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                        <a class="page-link border-secondary text-muted" href="?page={{ page_obj.previous_page_number }}&status={{ filtros.status }}&data={{ filtros.data }}&busca={{ filtros.busca }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
                     </li>
                 {% endif %}
 
                 <li class="page-item active">
                     <span class="page-link bg-primary border-primary">
-                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                        {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
                     </span>
                 </li>
 
                 {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link bg-dark  border-secondary" href="?page={{ page_obj.next_page_number }}">Próxima</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link bg-dark  border-secondary" href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+                        <a class="page-link border-secondary text-muted" href="?page={{ page_obj.next_page_number }}&status={{ filtros.status }}&data={{ filtros.data }}&busca={{ filtros.busca }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
                     </li>
                 {% endif %}
             </ul>
@@ -252,26 +257,24 @@
     {% endif %}
 </div>
 
-<!-- Modal de Cancelamento -->
 <div class="modal fade" id="cancelarModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content bg-dark">
-            <div class="modal-header border-secondary">
+        <div class="modal-content" style="background-color: var(--card-bg); color: var(--text-light); border: 1px solid var(--border-color);">
+            <div class="modal-header" style="border-bottom-color: var(--border-color);">
                 <h5 class="modal-title">Cancelar Agendamento</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1) grayscale(100%) brightness(200%);"></button>
             </div>
             <form id="cancelarForm" method="POST">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Motivo do cancelamento:</label>
-                        <textarea name="motivo" class="form-control bg-dark  border-secondary" 
-                                  rows="3" required placeholder="Informe o motivo do cancelamento..."></textarea>
+                        <textarea name="motivo" class="form-control" rows="3" required placeholder="Informe o motivo do cancelamento..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer border-secondary">
+                <div class="modal-footer" style="border-top-color: var(--border-color);">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    <button type="submit" class="btn btn-danger">Cancelar Agendamento</button>
+                    <button type="submit" class="btn btn-danger">Confirmar Cancelamento</button>
                 </div>
             </form>
         </div>
@@ -289,12 +292,11 @@ function cancelarAgendamento(agendamentoId) {
     modal.show();
 }
 
-// Auto-refresh a cada 30 segundos
-setInterval(function() {
+// Auto-refresh a cada 60 segundos para manter o dashboard atualizado
+setTimeout(function() {
     if (!document.querySelector('.modal.show')) {
         location.reload();
     }
-}, 30000);
+}, 60000);
 </script>
 {% endblock %}
-

@@ -1,38 +1,228 @@
 {% extends 'base/base_login.html' %}
 {% load static %}
 
-{% block title %}Login - Lava Jato 2025{% endblock %}
+{% block title %}Acesso ao Sistema{% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <div class="login-box">
-        <div class="text-center mb-4">
-            <i class="fas fa-car-wash fa-3x text-primary"></i>
-            <h2 class="mt-2">LAVA JATO 2025</h2>
-            <p class="text-muted">Acesse sua conta para continuar</p>
+<div class="login-container fade-in-up">
+    
+    <div class="text-center mb-4">
+        <h3 class="fw-bold text-white tracking-tight mb-0">Lava Jato 2025</h3>
+    </div>
+
+    <div class="login-card">
+        <div class="card-body p-4 p-md-5">
+            
+            <div class="text-center mb-4">
+                <h5 class="fw-bold text-white">Bem-vindo de volta!</h5>
+                <p class="text-muted small">Insira suas credenciais para acessar.</p>
+            </div>
+
+            {% if form.errors %}
+                <div class="alert alert-danger-custom mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-circle me-2 fs-5"></i>
+                        <span>Usuário ou senha incorretos.</span>
+                    </div>
+                </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="id_username" class="form-label-custom">Usuário</label>
+                    <div class="input-group-custom">
+                        <span class="input-icon"><i class="far fa-user"></i></span>
+                        <input type="text" name="username" id="id_username" 
+                               class="form-control-custom" placeholder="Seu usuário de acesso" required>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="id_password" class="form-label-custom mb-0">Senha</label>
+                        <a href="{% url 'password_reset' %}" class="link-forgot">Esqueceu a senha?</a>
+                    </div>
+                    <div class="input-group-custom">
+                        <span class="input-icon"><i class="fas fa-lock"></i></span>
+                        <input type="password" name="password" id="id_password" 
+                               class="form-control-custom with-eye" placeholder="Sua senha segura" required>
+                        <span class="input-eye" onclick="togglePassword()">
+                            <i class="far fa-eye" id="toggleIcon"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    ACESSAR SISTEMA
+                </button>
+            </form>
         </div>
+    </div>
 
-        {% if form.errors %}
-            <div class="alert alert-danger" role="alert">
-                Seu nome de usuário e senha não correspondem. Por favor, tente novamente.
-            </div>
-        {% endif %}
-
-        <form method="post">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="id_username" class="form-label-custom">Usuário</label>
-                <input type="text" name="username" identrar="id_username" class="form-control form-control-custom" required>
-            </div>
-            <div class="mb-4">
-                <label for="id_password" class="form-label-custom">Senha</label>
-                <input type="password" name="password" id="id_password" class="form-control form-control-custom" required>
-            </div>
-            <div class="d-flex justify-content-end mb-4">
-                <a href="{% url 'password_reset' %}" class="text-muted text-decoration-none small">Esqueceu a senha?</a>
-            </div>
-            <button style="color:white" type="submit" class="btn btn-primary-custom w-100">Entrar</button>
-        </form>
+    <div class="text-center mt-4">
+        <p class="text-muted x-small opacity-75">&copy; 2025 Norte Tech. Gestão Inteligente.</p>
     </div>
 </div>
+
+<style>
+    /* AUMENTAR O CARD: Força a largura máxima para 480px */
+    .login-container {
+        max-width: 480px !important;
+    }
+
+    /* Logo estilizado */
+    .logo-badge {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, var(--primary), #1d4ed8);
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.5);
+        transform: rotate(-5deg);
+        transition: transform 0.3s;
+    }
+    .logo-badge:hover { transform: rotate(0deg); }
+
+    /* Cartão Mais Bonito */
+    .login-card {
+        background-color: #1e293b; /* Slate 800 */
+        border: 1px solid #334155; /* Slate 700 */
+        border-radius: 24px; /* Bordas bem arredondadas */
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Inputs */
+    .form-label-custom {
+        color: #cbd5e1; /* Slate 300 */
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .input-group-custom {
+        position: relative;
+    }
+
+    /* Ícone à esquerda */
+    .input-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+        pointer-events: none;
+        transition: color 0.2s;
+        font-size: 1.1rem;
+    }
+
+    /* Input em si (Mais alto e espaçoso) */
+    .form-control-custom {
+        width: 100%;
+        background-color: #0f172a; /* Slate 900 (Mais escuro que o card) */
+        border: 1px solid #334155;
+        color: white;
+        padding: 0.75rem 1rem 0.75rem 3.2rem; /* Espaço para o ícone esquerdo */
+        border-radius: 12px;
+        font-size: 1rem;
+        height: 52px; /* Altura fixa para ficar robusto */
+        transition: all 0.2s ease;
+    }
+    
+    .form-control-custom.with-eye {
+        padding-right: 3.2rem;
+    }
+
+    .form-control-custom:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); /* Glow azul */
+        outline: none;
+    }
+
+    .form-control-custom:focus + .input-icon {
+        color: var(--primary);
+    }
+
+    .form-control-custom::placeholder {
+        color: #475569;
+    }
+
+    /* Ícone Olho à direita */
+    .input-eye {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+        cursor: pointer;
+        transition: color 0.2s;
+        padding: 5px; /* Área de clique melhor */
+    }
+    .input-eye:hover { color: var(--text-main); }
+
+    /* Links */
+    .link-forgot {
+        color: var(--primary);
+        font-size: 0.85rem;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .link-forgot:hover { text-decoration: underline; color: #60a5fa; }
+
+    /* Botão Grande */
+    .btn-login {
+        width: 100%;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        height: 52px; /* Mesma altura dos inputs */
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        font-size: 1rem;
+        transition: all 0.2s;
+        margin-top: 0.5rem;
+        text-transform: uppercase;
+    }
+    .btn-login:hover {
+        background-color: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Alertas */
+    .alert-danger-custom {
+        background-color: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
+        border-radius: 12px;
+        font-size: 0.95rem;
+    }
+
+    .x-small { font-size: 0.75rem; }
+</style>
+
+{% block extra_js %}
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('id_password');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+</script>
+{% endblock %}
 {% endblock %}

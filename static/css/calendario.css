@@ -1,0 +1,106 @@
+/* lavajato2025/static/css/calendario.css */
+
+/* --- Container do Calendário --- */
+.calendar-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    min-height: 80vh; /* Ocupa boa parte da tela */
+}
+
+/* --- Customização do FullCalendar (Variáveis CSS) --- */
+:root {
+    --fc-border-color: var(--border-color);
+    --fc-button-text-color: #fff;
+    --fc-button-bg-color: var(--primary-color);
+    --fc-button-border-color: var(--primary-color);
+    --fc-button-hover-bg-color: var(--primary-dark);
+    --fc-button-hover-border-color: var(--primary-dark);
+    --fc-button-active-bg-color: var(--primary-dark);
+    --fc-button-active-border-color: var(--primary-dark);
+    
+    --fc-event-bg-color: var(--primary-color);
+    --fc-event-border-color: var(--primary-color);
+    --fc-event-text-color: #fff;
+    
+    --fc-today-bg-color: rgba(59, 130, 246, 0.05);
+    --fc-page-bg-color: var(--card-bg);
+    --fc-neutral-bg-color: var(--hover-bg);
+    --fc-list-event-hover-bg-color: var(--hover-bg);
+}
+
+/* Textos do Calendário */
+.fc {
+    color: var(--text-light);
+    font-family: 'Inter', sans-serif;
+}
+
+.fc-col-header-cell-cushion,
+.fc-daygrid-day-number {
+    color: var(--text-light);
+    text-decoration: none !important;
+}
+
+.fc-col-header-cell {
+    background-color: var(--card-header-bg);
+    padding: 10px 0;
+}
+
+/* Eventos */
+.fc-event {
+    border: none;
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: transform 0.1s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.fc-event:hover {
+    transform: scale(1.02);
+    filter: brightness(1.1);
+}
+
+/* Ajuste do Toolbar (Botões de navegação) */
+.fc-toolbar-title {
+    font-size: 1.5rem !important;
+    font-weight: 700;
+}
+
+.fc-button {
+    text-transform: capitalize;
+    font-weight: 500;
+    padding: 0.4em 1em !important;
+    border-radius: 0.5rem !important;
+}
+
+/* Popover/Modal de Eventos (se usado interno) */
+.fc-popover {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    box-shadow: var(--shadow-lg);
+}
+
+.fc-popover-header {
+    background-color: var(--card-header-bg);
+    color: var(--text-light);
+}
+
+.fc-popover-body {
+    color: var(--text-light);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .fc-header-toolbar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+    }
+}
