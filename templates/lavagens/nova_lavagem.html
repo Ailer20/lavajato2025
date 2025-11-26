@@ -1,12 +1,15 @@
 {% extends 'base/base.html' %}
 {% load static %}
 
-{% block title %}Detalhes da Lavagem #{{ lavagem.codigo }}{% endblock %}
+{% block title %}Nova Lavagem - Lava Jato 2025{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/components.css' %}">
-    <link rel="stylesheet" href="{% static 'css/detalhes.css' %}">
+    <link rel="stylesheet" href="{% static 'css/nova_lavagem.css' %}">
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 {% endblock %}
 
 {% block content %}
@@ -14,282 +17,336 @@
     
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <div class="d-flex align-items-center gap-3">
-                <h2 class="mb-0 fw-bold" style="color: var(--text-light);">
-                    Lavagem #{{ lavagem.codigo }}
-                </h2>
-                {% if lavagem.status == 'EM_ANDAMENTO' %}
-                    <span class="badge bg-warning text-dark"><i class="fas fa-spinner fa-spin me-1"></i> Em Andamento</span>
-                {% elif lavagem.status == 'CONCLUIDA' %}
-                    <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Concluída</span>
-                {% elif lavagem.status == 'CANCELADA' %}
-                    <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i> Cancelada</span>
-                {% endif %}
-            </div>
-            <p class="text-muted mb-0 mt-1">
-                Iniciada em {{ lavagem.hora_inicio|date:"d/m/Y \à\s H:i" }}
-            </p>
+            <h2 class="mb-1 fw-bold" style="color: var(--text-light);">
+                <i class="fas fa-plus-circle me-2 text-success"></i>Iniciar Lavagem
+            </h2>
+            <p class="text-muted mb-0">Registro de entrada de veículo para serviço imediato</p>
         </div>
         <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Voltar ao Dashboard
+            <i class="fas fa-times me-2"></i>Cancelar
         </a>
     </div>
 
-    <div class="row">
-        <div class="col-lg-8">
-            
-            <div class="card-custom mb-4">
-                <div class="card-header-custom">
-                    <h5 class="mb-0"><i class="fas fa-car me-2"></i>Veículo e Contrato</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 detail-group">
-                            <span class="detail-label">Veículo / Placa</span>
-                            <div class="detail-value highlight d-flex align-items-center justify-content-between">
-                                <span>
-                                    <strong>{{ lavagem.placa_veiculo }}</strong>
-                                    {% if lavagem.veiculo %}
-                                        <span class="text-muted ms-2">- {{ lavagem.veiculo.modelo }}</span>
-                                    {% endif %}
-                                </span>
-                                <i class="fas fa-car text-muted opacity-50"></i>
+    <form method="POST" id="novaLavagemForm">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-lg-8">
+                
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="avatar-circle bg-primary" style="width: 32px; height: 32px; font-size: 0.8rem;">1</div>
+                        <h5 class="section-title">Veículo e Cliente</h5>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Placa do Veículo *</label>
+                            <div class="vehicle-search-box">
+                                <input type="text" class="form-control fw-bold text-uppercase fs-5" 
+                                       name="placa_veiculo" id="placa_veiculo" 
+                                       placeholder="ABC-1234" maxlength="8" required>
+                                
+                                <div class="search-icon-status">
+                                    <span id="loading-icon" class="text-primary" style="display:none;">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </span>
+                                    <span id="success-icon" class="text-success" style="display:none;">
+                                        <i class="fas fa-check-circle"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div id="vehicle-card" class="vehicle-found-card">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fas fa-car text-success"></i>
+                                    <div class="lh-1">
+                                        <strong id="v-modelo" class="d-block text-light">Modelo</strong>
+                                        <small id="v-cliente" class="text-muted" style="font-size: 0.75rem;">Cliente</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="col-md-6 detail-group">
-                            <span class="detail-label">Contrato / Setor</span>
-                            <div class="detail-value">
-                                {% if lavagem.cliente %}
-                                    <strong>{{ lavagem.cliente.nome }}</strong>
-                                    {% if lavagem.contrato %}
-                                        <small class="text-muted ms-2">({{ lavagem.contrato }})</small>
-                                    {% endif %}
-                                {% elif lavagem.contrato %}
-                                    {{ lavagem.contrato }}
-                                {% else %}
-                                    <span class="text-muted fst-italic">Não informado</span>
-                                {% endif %}
-                            </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Contrato / Setor</label>
+                            <select class="form-select" name="cliente" id="cliente_select">
+                                <option value="">Selecione ou busque...</option>
+                                {% for cliente in clientes %}
+                                    <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-
-                        <div class="col-md-6 detail-group">
-                            <span class="detail-label">Localização</span>
-                            <div class="detail-value">{{ lavagem.base.nome }} - {{ lavagem.local }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-custom mb-4">
-                <div class="card-header-custom">
-                    <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Serviço e Valores</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 detail-group">
-                            <span class="detail-label">Tipo de Lavagem</span>
-                            <div class="detail-value">{{ lavagem.tipo_lavagem.nome }}</div>
-                        </div>
-                        <div class="col-md-6 detail-group">
-                            <span class="detail-label">Equipamento</span>
-                            <div class="detail-value">{{ lavagem.transporte_equipamento.nome }}</div>
-                        </div>
-                    </div>
-
-                    <hr class="border-secondary opacity-25 my-4">
-
-                    <div class="row align-items-end">
-                        <div class="col-md-4 detail-group">
-                            <span class="detail-label">Valor do Serviço</span>
-                            <div class="fs-5 text-muted">R$ {{ lavagem.valor_servico|default:"0,00" }}</div>
-                        </div>
-                        <div class="col-md-4 detail-group">
-                            <span class="detail-label">Desconto</span>
-                            <div class="fs-5 text-danger">- R$ {{ lavagem.desconto|default:"0,00" }}</div>
-                        </div>
-                        <div class="col-md-4 detail-group">
-                            <span class="detail-label">Valor Final</span>
-                            <div class="detail-value bg-success bg-opacity-10 border-success text-success fw-bold fs-4 text-center">
-                                R$ {{ lavagem.valor_final|default:"0,00" }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {% if lavagem.observacoes %}
-            <div class="card-custom mb-4">
-                <div class="card-body">
-                    <span class="detail-label mb-2"><i class="fas fa-comment-alt me-1"></i> Observações</span>
-                    <div class="p-3 bg-dark-subtle rounded border border-secondary border-opacity-25">
-                        {{ lavagem.observacoes|linebreaks }}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-        </div>
-
-        <div class="col-lg-4">
-            
-            {% if lavagem.status == 'EM_ANDAMENTO' %}
-            <div class="card-custom mb-4 border-primary">
-                <div class="card-header-custom bg-primary-subtle">
-                    <h5 class="mb-0 text-primary"><i class="fas fa-gamepad me-2"></i>Controle</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-3">
-                        <form method="POST" action="{% url 'concluir_lavagem' lavagem.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-success-custom w-100 py-3 fw-bold" onclick="return confirm('Confirmar a conclusão do serviço?')">
-                                <i class="fas fa-check-double fa-lg me-2"></i> CONCLUIR LAVAGEM
-                            </button>
-                        </form>
                         
-                        <button type="button" class="btn btn-outline-danger w-100" data-bs-toggle="modal" data-bs-target="#cancelModal">
-                            <i class="fas fa-ban me-2"></i> Cancelar Serviço
+                        <div class="col-md-12">
+                            <label class="form-label small text-muted">Observação de Contrato (Opcional)</label>
+                            <input type="text" class="form-control form-control-sm" name="contrato" placeholder="Digite se não selecionou acima...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="avatar-circle bg-primary" style="width: 32px; height: 32px; font-size: 0.8rem;">2</div>
+                        <h5 class="section-title">Configuração do Serviço</h5>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Base Operacional *</label>
+                            <select class="form-select" name="base" id="base_select" required>
+                                <option value="">Selecione a base...</option>
+                                {% for base in bases %}
+                                    <option value="{{ base.id }}">{{ base.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Local Específico *</label>
+                            <div class="local-selection" id="local_container">
+                                <input type="hidden" name="local" id="local_hidden" required>
+                                <button type="button" class="btn-local" data-value="DICK 1" disabled>DICK 1</button>
+                                <button type="button" class="btn-local" data-value="DICK 2" disabled>DICK 2</button>
+                                <button type="button" class="btn-local" data-value="BASES" disabled>BASES</button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12"><hr class="border-secondary opacity-25 my-2"></div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de Lavagem *</label>
+                            <select class="form-select" name="tipo_lavagem" id="tipo_lavagem" required>
+                                <option value="">Selecione...</option>
+                                {% for tipo in tipos_lavagem %}
+                                    <option value="{{ tipo.id }}" data-preco="{{ tipo.preco_base }}">
+                                        {{ tipo.nome }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Equipamento / Porte *</label>
+                            <select class="form-select" name="transporte_equipamento" id="transporte_equipamento" required>
+                                <option value="">Selecione...</option>
+                                {% for transporte in transportes_equipamentos %}
+                                    <option value="{{ transporte.id }}" data-multiplicador="{{ transporte.multiplicador_preco }}">
+                                        {{ transporte.nome }} 
+                                        {% if transporte.multiplicador_preco > 1 %} (x{{ transporte.multiplicador_preco }}){% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Equipe (Lavadores)</label>
+                            <select class="form-control" name="lavadores" id="lavadores_select" multiple>
+                                {% for lavador in lavadores %}
+                                    <option value="{{ lavador.id }}">{{ lavador.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="avatar-circle bg-primary" style="width: 32px; height: 32px; font-size: 0.8rem;">3</div>
+                        <h5 class="section-title">Detalhes Operacionais</h5>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Data e Hora Início *</label>
+                            <input type="datetime-local" class="form-control" name="hora_inicio" id="hora_inicio" required>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label">Observações</label>
+                            <textarea class="form-control" name="observacoes" rows="2" placeholder="Observações adicionais..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+                <div class="summary-card">
+                    <div class="total-label">Valor Total Estimado</div>
+                    <div class="total-value" id="display_valor">R$ 0,00</div>
+                    <input type="hidden" name="valor_servico" id="valor_servico_hidden">
+
+                    <div class="summary-details" id="resumo_detalhes">
+                        <p class="text-center text-muted small mb-0">Selecione o serviço e o equipamento para calcular.</p>
+                    </div>
+
+                    <div class="d-grid gap-3 mt-4">
+                        <button type="submit" class="btn btn-success-custom btn-lg shadow fw-bold">
+                            <i class="fas fa-check-circle me-2"></i> INICIAR LAVAGEM
                         </button>
                     </div>
                 </div>
             </div>
-            {% endif %}
-
-            <div class="card-custom mb-4">
-                <div class="card-header-custom">
-                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Equipe Responsável</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush bg-transparent">
-                        {% for lavador in lavagem.lavadores.all %}
-                            <li class="list-group-item bg-transparent d-flex align-items-center px-0">
-                                <div class="avatar-circle bg-secondary me-3" style="width: 32px; height: 32px; font-size: 0.8rem;">
-                                    {{ lavador.nome|slice:":1" }}
-                                </div>
-                                <div>
-                                    <div class="fw-bold">{{ lavador.nome }}</div>
-                                    <small class="text-muted">Colaborador</small>
-                                </div>
-                            </li>
-                        {% empty %}
-                            <li class="list-group-item bg-transparent text-muted px-0 fst-italic">
-                                Nenhuma equipe atribuída.
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-
-<div class="card-custom">
-                <div class="card-header-custom">
-                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Cronologia</h5>
-                </div>
-                <div class="card-body">
-                    <div class="status-timeline">
-                        <div class="timeline-item active">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-content">
-                                <h6>Início do Serviço</h6>
-                                <small class="text-muted">{{ lavagem.hora_inicio|date:"d/m/Y H:i" }}</small>
-                            </div>
-                        </div>
-
-                        {% if lavagem.status == 'EM_ANDAMENTO' %}
-                            <div class="timeline-item active">
-                                <div class="timeline-dot" style="background-color: var(--warning-color, #f59e0b); border-color: #f59e0b; animation: pulse 2s infinite;"></div>
-                                <div class="timeline-content">
-                                    <h6 class="text-warning">Em Execução</h6>
-                                    <small class="text-muted" id="tempo-decorrido">Calculando tempo...</small>
-                                </div>
-                            </div>
-                        {% elif lavagem.status == 'CONCLUIDA' %}
-                            <div class="timeline-item active">
-                                <div class="timeline-dot" style="background-color: var(--success-color);"></div>
-                                <div class="timeline-content">
-                                    <h6 class="text-success">Finalizado</h6>
-                                    <small class="text-muted">{{ lavagem.hora_termino|date:"d/m/Y H:i" }}</small>
-                                    <div class="mt-1 badge bg-dark border border-secondary">
-                                        Duração: {{ lavagem.duracao_lavagem }} min
-                                    </div>
-                                </div>
-                            </div>
-                        {% elif lavagem.status == 'CANCELADA' %}
-                             <div class="timeline-item active">
-                                <div class="timeline-dot" style="background-color: var(--danger-color, #ef4444); border-color: #ef4444;"></div>
-                                <div class="timeline-content">
-                                    <h6 class="text-danger">Cancelado</h6>
-                                    <small class="text-muted">Serviço interrompido</small>
-                                </div>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
         </div>
-    </div>
+    </form>
 </div>
-
-{% if lavagem.status == 'EM_ANDAMENTO' %}
-<div class="modal fade" id="cancelModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content bg-dark">
-            <div class="modal-header">
-                <h5 class="modal-title text-danger">Cancelar Lavagem</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST" action="{% url 'cancelar_lavagem' lavagem.id %}">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <p>Tem certeza que deseja cancelar a lavagem do veículo <strong>{{ lavagem.placa_veiculo }}</strong>?</p>
-                    <div class="mb-3">
-                        <label class="form-label-custom">Motivo *</label>
-                        <textarea class="form-control form-control-custom" name="motivo" rows="3" required placeholder="Descreva o motivo..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer border-top-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
-                    <button type="submit" class="btn btn-danger">Confirmar Cancelamento</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% endif %}
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
-    // Script para atualizar o tempo decorrido em tempo real
-    {% if lavagem.status == 'EM_ANDAMENTO' %}
-    function atualizarTempo() {
-        const inicio = new Date('{{ lavagem.hora_inicio|date:"c" }}');
-        const agora = new Date();
-        const diffMs = agora - inicio;
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHrs = Math.floor(diffMins / 60);
-        const minsRestantes = diffMins % 60;
+$(document).ready(function() {
+    // --- 1. Inicialização ---
+    
+    // Select2 para Lavadores
+    $('#lavadores_select').select2({
+        placeholder: "Selecione a equipe responsável",
+        theme: "bootstrap-5",
+        width: '100%'
+    });
+    
+    // Select2 para Cliente (Contrato/Setor)
+    $('#cliente_select').select2({
+        placeholder: "Selecione o contrato/setor",
+        theme: "bootstrap-5",
+        width: '100%'
+    });
+
+    // Configurar Data/Hora Inicial (Agora)
+    const now = new Date();
+    // Ajuste para fuso horário local
+    const offset = now.getTimezoneOffset() * 60000;
+    const localIso = new Date(now - offset).toISOString().slice(0, 16);
+    $('#hora_inicio').val(localIso);
+
+
+    // --- 2. Lógica de Base e Locais ---
+    $('#base_select').change(function() {
+        const baseId = $(this).val();
+        const btns = $('.btn-local');
         
-        let texto = "";
-        if (diffHrs > 0) {
-            texto += diffHrs + "h ";
+        if(baseId) {
+            btns.prop('disabled', false);
+            // Se nenhum estiver ativo, ativa o primeiro
+            if (!$('.btn-local.active').length) {
+                btns.first().click();
+            }
+        } else {
+            btns.prop('disabled', true).removeClass('active');
+            $('#local_hidden').val('');
         }
-        texto += minsRestantes + "min decorridos";
+    });
+
+    // Botões de Local
+    $('.btn-local').click(function() {
+        if($(this).prop('disabled')) return;
         
-        const el = document.getElementById('tempo-decorrido');
-        if(el) el.textContent = texto;
+        $('.btn-local').removeClass('active');
+        $(this).addClass('active');
+        // Salva o texto do botão (DICK 1, DICK 2, etc) no input hidden
+        $('#local_hidden').val($(this).text().trim());
+    });
+
+
+    // --- 3. Cálculo de Preço ---
+    function calcularTotal() {
+        const tipo = $('#tipo_lavagem option:selected');
+        const transporte = $('#transporte_equipamento option:selected');
+        
+        if (tipo.val() && transporte.val()) {
+            const precoBase = parseFloat(tipo.data('preco')) || 0;
+            const multiplicador = parseFloat(transporte.data('multiplicador')) || 1;
+            
+            const total = precoBase * multiplicador;
+            
+            // Atualiza Display
+            $('#display_valor').text(total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}));
+            $('#valor_servico_hidden').val(total.toFixed(2));
+            
+            // Atualiza Detalhes
+            $('#resumo_detalhes').html(`
+                <div class="summary-row">
+                    <span>Serviço:</span>
+                    <span>${tipo.text().trim()}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Base:</span>
+                    <span>R$ ${precoBase.toFixed(2)}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Fator Equip.:</span>
+                    <span>x ${multiplicador}</span>
+                </div>
+            `);
+        } else {
+            $('#display_valor').text('R$ 0,00');
+            $('#valor_servico_hidden').val('');
+            $('#resumo_detalhes').html('<p class="text-center text-muted small mb-0">Aguardando seleção...</p>');
+        }
     }
 
-    setInterval(atualizarTempo, 60000); // Atualiza a cada minuto
-    atualizarTempo(); // Executa na hora
-    {% endif %}
-</script>
+    $('#tipo_lavagem, #transporte_equipamento').change(calcularTotal);
 
-<style>
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
-    70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-}
-</style>
+
+    // --- 4. Busca de Veículo por Placa ---
+    let searchTimeout;
+    $('#placa_veiculo').on('input', function() {
+        let input = $(this);
+        let placa = input.val().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        
+        // Máscara visual (AAA-9999 ou Mercosul)
+        if (placa.length > 3) {
+            placa = placa.substring(0, 3) + '-' + placa.substring(3, 7);
+        }
+        input.val(placa);
+
+        // Resetar UI
+        $('#loading-icon').hide();
+        $('#success-icon').hide();
+        $('#vehicle-card').hide();
+
+        clearTimeout(searchTimeout);
+
+        if (placa.length >= 7) {
+            $('#loading-icon').show();
+            
+            searchTimeout = setTimeout(function() {
+                $.get('/api/buscar-veiculo/', {placa: placa}, function(data) {
+                    $('#loading-icon').hide();
+                    
+                    if (data.found) {
+                        $('#success-icon').show();
+                        
+                        // Preenche card
+                        $('#v-modelo').text(`${data.veiculo.marca} ${data.veiculo.modelo} (${data.veiculo.cor})`);
+                        $('#v-cliente').text(data.cliente ? data.cliente.nome : 'Cliente não vinculado');
+                        $('#vehicle-card').slideDown(); 
+                        
+                        // Tenta selecionar o cliente (setor) automaticamente se vier da API
+                        if (data.cliente && data.cliente.id) {
+                             $('#cliente_select').val(data.cliente.id).trigger('change');
+                        }
+                    }
+                }).fail(function() {
+                    $('#loading-icon').hide();
+                });
+            }, 500);
+        }
+    });
+    
+    // Validação antes do envio
+    $('#novaLavagemForm').submit(function(e) {
+        if (!$('#local_hidden').val()) {
+            e.preventDefault();
+            alert('Por favor, selecione um Local Específico (clique nos botões).');
+            // Scroll para a área de erro
+            $('html, body').animate({
+                scrollTop: $("#local_container").offset().top - 150
+            }, 500);
+        }
+    });
+});
+</script>
 {% endblock %}

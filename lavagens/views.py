@@ -105,26 +105,24 @@ def nova_lavagem(request):
             tipo_lavagem = get_object_or_404(TipoLavagem, id=tipo_lavagem_id)
             transporte_equipamento = get_object_or_404(TransporteEquipamento, id=transporte_id)
 
-            # --- LÓGICA DE CONTRATO/SETOR ---
-            # Se selecionou algo no dropdown, pegamos o NOME e salvamos no campo contrato
-            valor_para_contrato = contrato_manual # Começa com o que foi digitado (se houver)
+            # --- LÓGICA DE CONTRATO/SETOR (A CORREÇÃO ESTÁ AQUI) ---
+            # Começa com o que foi digitado manualmente
+            texto_final_contrato = contrato_manual 
             
             cliente_obj = None
             if cliente_id:
                 try:
                     cliente_obj = Cliente.objects.get(id=cliente_id)
-                    # AQUI ESTÁ O TRUQUE: Copiamos o nome "COMUNICAÇÃO" para o campo contrato
-                    if not valor_para_contrato: 
-                        valor_para_contrato = cliente_obj.nome 
+                    # SE NÃO DIGITOU NADA MANUALMENTE, USA O NOME DO SETOR SELECIONADO
+                    if not texto_final_contrato: 
+                        texto_final_contrato = cliente_obj.nome 
                 except Cliente.DoesNotExist:
                     pass
 
             # 4. Criação
             lavagem = Lavagem.objects.create(
                 placa_veiculo=placa_veiculo.upper(),
-                # Podemos deixar cliente como None se você preferir, ou salvar ambos.
-                # Vou salvar ambos para segurança, mas o contrato terá o texto que você quer.
-                cliente=cliente_obj, 
+                cliente=cliente_obj, # Salva o vínculo para relatórios futuros
                 base=base,
                 local=local,
                 tipo_lavagem=tipo_lavagem,
@@ -134,8 +132,8 @@ def nova_lavagem(request):
                 data_lavagem=data_lavagem_obj,
                 observacoes=observacoes,
                 
-                # AQUI SALVAMOS O NOME DO SETOR NO CAMPO CONTRATO
-                contrato=valor_para_contrato, 
+                # AQUI SALVA O NOME "COMUNICAÇÃO" NO CAMPO DE TEXTO
+                contrato=texto_final_contrato, 
                 
                 valor_servico=valor_servico,
             )
