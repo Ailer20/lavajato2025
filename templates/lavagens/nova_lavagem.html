@@ -161,7 +161,12 @@
                             <label class="form-label">Data e Hora Início *</label>
                             <input type="datetime-local" class="form-control" name="hora_inicio" id="hora_inicio" required>
                         </div>
-                        
+
+                        <div class="col-md-6">
+                            <label class="form-label">Data e Hora Final (Previsão ou Real) *</label>
+                            <input type="datetime-local" class="form-control" name="hora_termino" id="hora_termino">
+                        </div>
+
                         <div class="col-12">
                             <label class="form-label">Observações</label>
                             <textarea class="form-control" name="observacoes" rows="2" placeholder="Observações adicionais..."></textarea>
@@ -221,7 +226,23 @@ $(document).ready(function() {
     const localIso = new Date(now - offset).toISOString().slice(0, 16);
     $('#hora_inicio').val(localIso);
 
-
+    $('#hora_inicio').change(function() {
+        const inicioVal = $(this).val();
+        if (inicioVal) {
+            const dataInicio = new Date(inicioVal);
+            // Adiciona 30 minutos
+            dataInicio.setMinutes(dataInicio.getMinutes() + 30);
+            
+            // Formata para o input datetime-local (YYYY-MM-DDTHH:mm)
+            const offset = dataInicio.getTimezoneOffset() * 60000;
+            const finalIso = new Date(dataInicio - offset).toISOString().slice(0, 16);
+            
+            // Só preenche se o campo final estiver vazio
+            if (!$('#hora_termino').val()) {
+                $('#hora_termino').val(finalIso);
+            }
+        }
+    });
     // --- 2. Lógica de Base e Locais ---
     $('#base_select').change(function() {
         const baseId = $(this).val();

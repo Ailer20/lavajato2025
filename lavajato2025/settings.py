@@ -10,7 +10,7 @@ env = environ.Env(
 )
 
 # Define o caminho do .env
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env(os.path.join(BASE_DIR, 'lavajato2025', '.env'))
 
 SECRET_KEY = env("SECRET_KEY")
 
@@ -79,24 +79,24 @@ WSGI_APPLICATION = 'lavajato2025.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#       'NAME': BASE_DIR / 'db.sqlite3',
-#   }
-#}
-
-
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DB_NAME"),
-        "USER": env("DB_USER"),
-        "PASSWORD": env("DB_PASSWORD"),
-        "HOST": env("DB_HOST"),
-        "PORT": env("DB_PORT"),
-    }
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+       'NAME': BASE_DIR / 'db.sqlite3',
+   }
 }
+
+
+#DATABASES = {
+#    "default": {
+#        "ENGINE": "django.db.backends.postgresql",
+#        "NAME": env("DB_NAME"),
+#       "USER": env("DB_USER"),
+#        "PASSWORD": env("DB_PASSWORD"),
+#        "HOST": env("DB_HOST"),
+#       "PORT": env("DB_PORT"),
+#    }
+#}
 
 
 # Password validation
@@ -188,4 +188,3 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'lavajatonorte3@gmail.com'  # <-- SEU E-MAIL DO GMAIL
 EMAIL_HOST_PASSWORD = 'idyvslrexvkwuzjw' # <-- SUA SENHA DE APP
 DEFAULT_FROM_EMAIL = 'Lava Jato 2025 <nao-responda@lavajato.com>'
-

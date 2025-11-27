@@ -27,7 +27,7 @@
                 {% endif %}
             </div>
             <p class="text-muted mb-0 mt-1">
-                Iniciada em {{ lavagem.hora_inicio|date:"d/m/Y \à\s H:i" }}
+                Registro criado em {{ lavagem.created_at|default:lavagem.hora_inicio|date:"d/m/Y H:i" }}
             </p>
         </div>
         <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
@@ -60,7 +60,16 @@
                         <div class="col-md-6 detail-group">
                             <span class="detail-label">Contrato / Setor</span>
                             <div class="detail-value">
-                                {{ lavagem.contrato|default:"Não informado" }}
+                                {% if lavagem.cliente %}
+                                    <strong>{{ lavagem.cliente.nome }}</strong>
+                                    {% if lavagem.contrato %}
+                                        <small class="text-muted ms-2">({{ lavagem.contrato }})</small>
+                                    {% endif %}
+                                {% elif lavagem.contrato %}
+                                    {{ lavagem.contrato }}
+                                {% else %}
+                                    <span class="text-muted fst-italic">Não informado</span>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -74,9 +83,31 @@
 
             <div class="card-custom mb-4">
                 <div class="card-header-custom">
-                    <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Serviço e Valores</h5>
+                    <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Serviço e Prazos</h5>
                 </div>
                 <div class="card-body">
+                    
+                    <div class="row mb-2">
+                        <div class="col-md-6 detail-group">
+                            <span class="detail-label">Data e Hora Início</span>
+                            <div class="detail-value">
+                                <i class="far fa-calendar-alt me-2 text-primary"></i>
+                                {{ lavagem.hora_inicio|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 detail-group">
+                            <span class="detail-label">Data Final (Previsão ou Real)</span>
+                            <div class="detail-value">
+                                {% if lavagem.hora_termino %}
+                                    <i class="far fa-clock me-2 text-info"></i>
+                                    {{ lavagem.hora_termino|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    <span class="text-muted small">Não informada</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6 detail-group">
                             <span class="detail-label">Tipo de Lavagem</span>
@@ -153,7 +184,7 @@
                 <div class="card-body">
                     <ul class="list-group list-group-flush bg-transparent">
                         {% for lavador in lavagem.lavadores.all %}
-                            <li class="list-group-item bg-transparent text-light d-flex align-items-center px-0">
+                            <li class="list-group-item bg-transparent d-flex align-items-center px-0">
                                 <div class="avatar-circle bg-secondary me-3" style="width: 32px; height: 32px; font-size: 0.8rem;">
                                     {{ lavador.nome|slice:":1" }}
                                 </div>
@@ -181,7 +212,7 @@
                             <div class="timeline-dot"></div>
                             <div class="timeline-content">
                                 <h6>Início do Serviço</h6>
-                                <small class="text-light">{{ lavagem.hora_inicio|date:"d/m/Y H:i" }}</small>
+                                <small class="text-muted">{{ lavagem.hora_inicio|date:"d/m/Y H:i" }}</small>
                             </div>
                         </div>
 
@@ -198,7 +229,7 @@
                                 <div class="timeline-dot" style="background-color: var(--success-color);"></div>
                                 <div class="timeline-content">
                                     <h6 class="text-success">Finalizado</h6>
-                                    <small class="text-light">{{ lavagem.hora_termino|date:"d/m/Y H:i" }}</small>
+                                    <small class="text-muted">{{ lavagem.hora_termino|date:"d/m/Y H:i" }}</small>
                                     <div class="mt-1 badge bg-dark border border-secondary">
                                         Duração: {{ lavagem.duracao_lavagem }} min
                                     </div>
@@ -224,18 +255,18 @@
 {% if lavagem.status == 'EM_ANDAMENTO' %}
 <div class="modal fade" id="cancelModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content" style="background-color: var(--card-bg); color: var(--text-light); border: 1px solid var(--border-color);">
-            <div class="modal-header border-bottom-0">
+        <div class="modal-content bg-dark">
+            <div class="modal-header">
                 <h5 class="modal-title text-danger">Cancelar Lavagem</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1);"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST" action="{% url 'cancelar_lavagem' lavagem.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <p>Tem certeza que deseja cancelar a lavagem do veículo <strong>{{ lavagem.placa_veiculo }}</strong>?</p>
                     <div class="mb-3">
-                        <label class="form-label">Motivo *</label>
-                        <textarea class="form-control" name="motivo" rows="3" required placeholder="Descreva o motivo..."></textarea>
+                        <label class="form-label-custom">Motivo *</label>
+                        <textarea class="form-control form-control-custom" name="motivo" rows="3" required placeholder="Descreva o motivo..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0">
@@ -251,6 +282,7 @@
 
 {% block extra_js %}
 <script>
+    // Script para atualizar o tempo decorrido em tempo real
     {% if lavagem.status == 'EM_ANDAMENTO' %}
     function atualizarTempo() {
         const inicio = new Date('{{ lavagem.hora_inicio|date:"c" }}');
@@ -270,8 +302,8 @@
         if(el) el.textContent = texto;
     }
 
-    setInterval(atualizarTempo, 60000); 
-    atualizarTempo(); 
+    setInterval(atualizarTempo, 60000); // Atualiza a cada minuto
+    atualizarTempo(); // Executa na hora
     {% endif %}
 </script>
 

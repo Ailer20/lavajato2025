@@ -74,21 +74,20 @@ def nova_lavagem(request):
         try:
             # 1. Captura dos dados
             placa_veiculo = request.POST.get("placa_veiculo")
-            
-            # Captura o ID do dropdown (onde você seleciona "COMUNICAÇÃO")
-            cliente_id = request.POST.get("cliente") 
-            
+            cliente_id = request.POST.get("cliente")
             base_id = request.POST.get("base")
             local = request.POST.get("local")
             tipo_lavagem_id = request.POST.get("tipo_lavagem")
             transporte_id = request.POST.get("transporte_equipamento")
             lavadores_ids = request.POST.getlist("lavadores") 
             hora_inicio_str = request.POST.get("hora_inicio")
+            
+            # --- NOVO: Captura a Hora Final ---
+            hora_termino_str = request.POST.get("hora_termino")
+            # ----------------------------------
+
             observacoes = request.POST.get("observacoes", "")
-            
-            # Captura o que foi digitado manualmente (se houver)
-            contrato_manual = request.POST.get("contrato", "") 
-            
+            contrato = request.POST.get("contrato", "")
             valor_servico_str = request.POST.get("valor_servico")
 
             # 2. Validação
@@ -99,43 +98,48 @@ def nova_lavagem(request):
             # 3. Conversão e Buscas
             hora_inicio_obj = datetime.strptime(hora_inicio_str, '%Y-%m-%dT%H:%M')
             data_lavagem_obj = hora_inicio_obj.date()
+            
+            # --- LÓGICA PARA HORA TÉRMINO ---
+            hora_termino_obj = None
+            if hora_termino_str:
+                hora_termino_obj = datetime.strptime(hora_termino_str, '%Y-%m-%dT%H:%M')
+            # --------------------------------
+
             valor_servico = Decimal(valor_servico_str) if valor_servico_str else Decimal('0.00')
             
             base = get_object_or_404(Base, id=base_id)
             tipo_lavagem = get_object_or_404(TipoLavagem, id=tipo_lavagem_id)
             transporte_equipamento = get_object_or_404(TransporteEquipamento, id=transporte_id)
 
-            # --- LÓGICA DE CONTRATO/SETOR (A CORREÇÃO ESTÁ AQUI) ---
-            # Começa com o que foi digitado manualmente
-            texto_final_contrato = contrato_manual 
-            
             cliente_obj = None
             if cliente_id:
                 try:
                     cliente_obj = Cliente.objects.get(id=cliente_id)
-                    # SE NÃO DIGITOU NADA MANUALMENTE, USA O NOME DO SETOR SELECIONADO
-                    if not texto_final_contrato: 
-                        texto_final_contrato = cliente_obj.nome 
                 except Cliente.DoesNotExist:
                     pass
 
             # 4. Criação
             lavagem = Lavagem.objects.create(
                 placa_veiculo=placa_veiculo.upper(),
-                cliente=cliente_obj, # Salva o vínculo para relatórios futuros
+                cliente=cliente_obj,
                 base=base,
                 local=local,
                 tipo_lavagem=tipo_lavagem,
                 transporte_equipamento=transporte_equipamento,
                 hora_inicio=hora_inicio_obj,
-                hora_termino=None,
+                
+                # --- AQUI: Salva a hora término ---
+                hora_termino=hora_termino_obj,
+                # ----------------------------------
+                
                 data_lavagem=data_lavagem_obj,
                 observacoes=observacoes,
-                
-                # AQUI SALVA O NOME "COMUNICAÇÃO" NO CAMPO DE TEXTO
-                contrato=texto_final_contrato, 
-                
+                contrato=contrato,
                 valor_servico=valor_servico,
+                
+                # Se já tiver hora término, podemos considerar CONCLUIDA automaticamente?
+                # Se preferir, descomente a linha abaixo:
+                # status='CONCLUIDA' if hora_termino_obj else 'EM_ANDAMENTO',
             )
             
             if lavadores_ids:
@@ -147,7 +151,6 @@ def nova_lavagem(request):
         except Exception as e:
             messages.error(request, f"Erro ao criar lavagem: {str(e)}")
             return redirect("nova_lavagem")
-    
     # GET
     context = {
         "clientes": Cliente.objects.filter(ativo=True).order_by('nome'),
